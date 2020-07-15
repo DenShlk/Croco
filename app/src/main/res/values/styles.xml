@@ -1,0 +1,31 @@
+<resources>
+
+    <style name="Theme.Croco" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/colorPrimaryText</item>
+        <item name="android:textColorSecondary">@color/colorSecondaryText</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+   </style>
+
+    <style name="Widget.Croco.MenuMaterialButton" parent="Widget.MaterialComponents.Button">
+        <item name="background">@color/colorPrimary</item>
+        <item name="backgroundTint">@color/colorPrimary</item>
+        <item name="cornerRadius">20dp</item>
+    </style>
+
+    <style name="Widget.Croco.AppNameTextView" parent="TextAppearance.MaterialComponents.Headline1">
+        <item name="fontFamily">@font/fredoka_one_regular</item>
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
+    <style name="TextAppearance.Croco.FredokaFont" parent="TextAppearance.AppCompat.Headline">
+        <item name="fontFamily">@font/fredoka_one_regular</item>
+    </style>
+
+    <style name="Widget.Croco.NumberPicker" parent="Theme.Croco">
+        <item name="android:textSize">40dp</item>
+    </style>
+
+</resources>
