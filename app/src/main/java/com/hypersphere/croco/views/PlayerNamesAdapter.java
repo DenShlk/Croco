@@ -1,0 +1,182 @@
+package com.hypersphere.croco.views;
+
+import android.animation.ValueAnimator;
+import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.util.Log;
+import android.view.DragEvent;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
+import com.hypersphere.croco.CrocoApplication;
+import com.hypersphere.croco.R;
+import com.hypersphere.croco.helpers.IOHelper;
+
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Shows name items in table. User can change and drag them.
+ */
+public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.PlayerNameHolder> {
+
+	private List<String> mData;
+	private ItemTouchHelper mItemTouchHelper;
+
+	public PlayerNamesAdapter(List<String> data) {
+		mData = data;
+	}
+
+	@NonNull
+	@Override
+	public PlayerNameHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+		View itemView = LayoutInflater.from(parent.getContext())
+				.inflate(R.layout.player_name_item, parent, false);
+
+		return new PlayerNameHolder(itemView);
+	}
+
+	@Override
+	public void onBindViewHolder(@NonNull PlayerNameHolder holder, int position) {
+		holder.fill(mData.get(position), position);
+		//holder.setLast(position == getItemCount() - 1);
+	}
+
+	public void swipe(int first, int second){
+		Collections.swap(mData, first, second);
+		notifyItemMoved(first, second);
+	}
+
+	public void attachToItemTouchHelper(ItemTouchHelper helper){
+		mItemTouchHelper = helper;
+	}
+
+	public List<String> getPlayerNames(){
+		return mData;
+	}
+
+	@Override
+	public int getItemCount() {
+		return mData.size();
+	}
+
+	public class PlayerNameHolder extends RecyclerView.ViewHolder {
+
+		private TextView mNameText;
+		private View mBottomLine;
+		private EditText mNameEdit;
+		private View mBackground;
+
+		private int mPosition;
+
+		public PlayerNameHolder(@NonNull View itemView) {
+			super(itemView);
+
+			mNameText = itemView.findViewById(R.id.player_name_item_name_text);
+			mBottomLine = itemView.findViewById(R.id.player_name_item_bottom_line);
+			mNameEdit = itemView.findViewById(R.id.player_name_item_name_edit);
+			mBackground = itemView.findViewById(R.id.player_name_item_background);
+
+			ImageButton mDragButton = itemView.findViewById(R.id.player_name_item_drag_button);
+			mDragButton.setOnTouchListener(new View.OnTouchListener() {
+				@Override
+				public boolean onTouch(View v, MotionEvent event) {
+					if(event.getAction() == MotionEvent.ACTION_DOWN){
+						mItemTouchHelper.startDrag(PlayerNameHolder.this);
+					}
+					return false;
+				}
+			});
+
+			ImageButton editButton = itemView.findViewById(R.id.player_name_item_edit_button);
+			editButton.setOnClickListener(v -> {
+				mNameText.setVisibility(View.INVISIBLE);
+				mNameEdit.setVisibility(View.VISIBLE);
+				mNameEdit.findFocus();
+				mNameEdit.requestFocus();
+				mNameEdit.setSelection(mNameEdit.getText().length());
+				InputMethodManager imm = (InputMethodManager) CrocoApplication.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+				imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_IMPLICIT);
+			});
+
+			ImageButton randomButton = itemView.findViewById(R.id.player_name_item_random_button);
+			randomButton.setOnClickListener(v -> {
+				String newName;
+				do {
+					newName = IOHelper.getRandomName();
+				}while (mData.contains(newName));
+				update(newName);
+			});
+
+			mNameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+				@Override
+				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+					if(actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO){
+						String newName = String.valueOf(mNameEdit.getText());
+
+						update(newName);
+						mNameEdit.clearFocus();
+						mNameText.setVisibility(View.VISIBLE);
+						mNameEdit.setVisibility(View.INVISIBLE);
+						InputMethodManager imm = (InputMethodManager) CrocoApplication.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(mNameEdit.getWindowToken(), 0);
+					}
+
+					return false;
+				}
+			});
+		}
+		
+		public void onDrag(){
+			ValueAnimator animator = ValueAnimator.ofArgb(
+					CrocoApplication.getContext().getColor(R.color.colorBackground),
+					CrocoApplication.getContext().getColor(R.color.colorSelectedBackground));
+			animator.setDuration(300);
+			animator.addUpdateListener(animation -> {
+				mBackground.setBackground(new ColorDrawable((Integer) animation.getAnimatedValue()));
+			});
+			animator.start();
+		}
+
+		public void onDragEnd(){
+			ValueAnimator animator = ValueAnimator.ofArgb(
+					CrocoApplication.getContext().getColor(R.color.colorSelectedBackground),
+					CrocoApplication.getContext().getColor(R.color.colorBackground));
+			animator.setDuration(300);
+			animator.addUpdateListener(animation -> {
+				mBackground.setBackground(new ColorDrawable((Integer) animation.getAnimatedValue()));
+			});
+			animator.start();
+		}
+		
+		private void update(String newName){
+			mData.set(mPosition, newName);
+			mNameText.setText(newName);
+			mNameEdit.setText(newName);
+		}
+
+		void fill(String name, int position){
+			mNameText.setText(name);
+			mNameEdit.setText(name);
+			mPosition = position;
+		}
+
+		void setLast(boolean isLast){
+			mBottomLine.setVisibility(isLast ? View.INVISIBLE : View.VISIBLE);
+		}
+	}
+}

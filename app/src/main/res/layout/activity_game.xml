@@ -39,7 +39,7 @@
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/game_scores_recycle"
+            android:id="@+id/game_scores_recycler"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginVertical="15dp"

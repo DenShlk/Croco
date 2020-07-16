@@ -86,7 +86,7 @@ public class GameActivity extends AppCompatActivity {
 
 		mSkipButton.setOnClickListener(v -> {
 			Pair<String, Integer> currentPlayerData = mNamesAndScores.get(mCurrentPlayerIndex);
-			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second - mGameConfig.getPointFinePerSkip()));
+			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second - mGameConfig.pointFinePerSkip));
 
 			if(isRoundFinished){
 				endRound();
@@ -101,7 +101,7 @@ public class GameActivity extends AppCompatActivity {
 			IOHelper.addUsedWord(word);
 
 			Pair<String, Integer> currentPlayerData = mNamesAndScores.get(mCurrentPlayerIndex);
-			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second + mGameConfig.getPointsPerWord()));
+			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second + mGameConfig.pointsPerWord));
 
 			if(isRoundFinished){
 				endRound();
@@ -110,7 +110,7 @@ public class GameActivity extends AppCompatActivity {
 			}
 		});
 
-		mTimerBar.setProgressMax(mGameConfig.getRoundDuration() * 1.0f);
+		mTimerBar.setProgressMax(mGameConfig.roundDuration * 1.0f);
 
 		mStartRoundButton.setOnClickListener(v -> startRound());
 
@@ -119,7 +119,7 @@ public class GameActivity extends AppCompatActivity {
 			finish();
 		});
 
-		RecyclerView scoresRecycler = findViewById(R.id.game_scores_recycle);
+		RecyclerView scoresRecycler = findViewById(R.id.game_scores_recycler);
 		scoresRecycler.setHasFixedSize(true);
 		scoresRecycler.setLayoutManager(new LinearLayoutManager(GameActivity.this, RecyclerView.VERTICAL, false));
 		mScoresAdapter = new PlayerScoresAdapter();
@@ -193,12 +193,12 @@ public class GameActivity extends AppCompatActivity {
 
 		loadNewWord();
 
-		ValueAnimator timerAnimator = ValueAnimator.ofFloat(mGameConfig.getRoundDuration(), 0f);
+		ValueAnimator timerAnimator = ValueAnimator.ofFloat(mGameConfig.roundDuration, 0f);
 
 		//see https://stackoverflow.com/questions/62903447/time-in-valueanimator-twice-faster-than-real-android/62903624#62903624 for understand
 		float animationScale = Settings.Global.getFloat(getContentResolver(),
 				Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f);
-		timerAnimator.setDuration((long) (mGameConfig.getRoundDuration() * 1000 / animationScale));
+		timerAnimator.setDuration((long) (mGameConfig.roundDuration * 1000 / animationScale));
 
 		timerAnimator.setInterpolator(new LinearInterpolator());
 
@@ -215,7 +215,7 @@ public class GameActivity extends AppCompatActivity {
 		});
 		timerAnimator.start();
 
-		mRoundEndHandler.postDelayed(this::timeUp, mGameConfig.getRoundDuration() * 1000);
+		mRoundEndHandler.postDelayed(this::timeUp, mGameConfig.roundDuration * 1000);
 		isRoundFinished = false;
 	}
 

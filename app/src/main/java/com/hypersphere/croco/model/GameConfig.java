@@ -8,15 +8,22 @@ import com.hypersphere.croco.helpers.IOHelper;
 
 public class GameConfig implements Serializable {
 
-	private int roundDuration = 20;//20 - debug
-	private int pointsPerWord = 2;
-	private int pointFinePerSkip = 1;
+	public static final int MIN_ROUND_DURATION = 30;
+	public static final int MAX_ROUND_DURATION = 300;
+	public static final int BASE_ROUND_DURATION = 60;
+	public static final int MIN_PLAYERS_COUNT = 2;
+	public static final int MAX_PLAYERS_COUNT = 10;
+	public static final int BASE_PLAYERS_COUNT = 3;
 
+	public final int pointsPerWord = 2;
+	public final int pointFinePerSkip = 1;
+	public final int roundDuration;
 	public final int playersCount;
 	public List<WordsList> wordsLists;
 	public final List<String> playerNames = new ArrayList<>();
 
-	public GameConfig(int playersCount, List<WordsList> wordsLists) {
+	public GameConfig(int roundDuration, int playersCount, List<WordsList> wordsLists) {
+		this.roundDuration = roundDuration;
 		this.playersCount = playersCount;
 		this.wordsLists = wordsLists;
 
@@ -28,29 +35,5 @@ public class GameConfig implements Serializable {
 
 			playerNames.add(name);
 		}
-	}
-
-	public int getRoundDuration() {
-		return roundDuration;
-	}
-
-	public void setRoundDuration(int roundDuration) {
-		this.roundDuration = roundDuration;
-	}
-
-	public int getPointsPerWord() {
-		return pointsPerWord;
-	}
-
-	public void setPointsPerWord(int pointsPerWord) {
-		this.pointsPerWord = pointsPerWord;
-	}
-
-	public int getPointFinePerSkip() {
-		return pointFinePerSkip;
-	}
-
-	public void setPointFinePerSkip(int pointFinePerSkip) {
-		this.pointFinePerSkip = pointFinePerSkip;
 	}
 }
