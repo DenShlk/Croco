@@ -20,12 +20,24 @@
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
-    <style name="TextAppearance.Croco.FredokaFont" parent="TextAppearance.AppCompat.Headline">
-        <item name="fontFamily">@font/fredoka_one_regular</item>
+    <style name="TextAppearance.Croco.ZelekFont" parent="TextAppearance.AppCompat.Headline">
+        <item name="fontFamily">@font/zelek_bold</item>
     </style>
 
     <style name="Widget.Croco.NumberPicker" parent="Theme.Croco">
         <item name="android:textSize">40dp</item>
+    </style>
+
+    <style name="Widget.Croco.Showcase" parent="ShowcaseView">
+        <item name="sv_backgroundColor">#CD4CAF50</item>
+        <item name="sv_showcaseColor">@color/colorPrimaryDark</item>
+        <item name="sv_buttonText">ОК</item>
+        <item name="sv_tintButtonColor">false</item>
+        <item name="sv_titleTextAppearance">@style/TextAppearance.Croco.ShowcaseTitle</item>
+    </style>
+
+    <style name="TextAppearance.Croco.ShowcaseTitle" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textColor">@color/colorAccent</item>
     </style>
 
 </resources>

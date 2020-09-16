@@ -6,6 +6,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.animation.ValueAnimator;
+import android.content.Intent;
+import android.media.AudioAttributes;
+import android.media.SoundPool;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
@@ -13,9 +17,14 @@ import android.util.Pair;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
+import com.hypersphere.croco.helpers.SettingsHelper;
+import com.hypersphere.croco.helpers.VibrationHelper;
 import com.hypersphere.croco.model.GameConfig;
 import com.hypersphere.croco.model.WordsList;
 import com.hypersphere.croco.views.PlayerScoresAdapter;
@@ -49,13 +58,43 @@ public class GameActivity extends AppCompatActivity {
 	private View mDoneButton;
 	private TextView mCurrentWordText;
 	private ImageButton mWordVisibilityButton;
+	private ImageButton mHelpButton;
+	private ImageView mSettingsButton;
+
+	private static final int TIMER_SOUND_RATE_INCREASING_DURATION = 10;
+	private static final float TIMER_SOUND_MIN_RATE = 1.0f;
+	private static final float TIMER_SOUND_MAX_RATE = 5.0f;
 
 	private Handler mRoundEndHandler = new Handler();
+	private SoundPool mSoundPool;
+
+	private int mTimerTickSoundId   = 0;
+	private int mAnsweredSoundId    = 0;
+	private int mSkipSoundId        = 0;
+	private int mRoundEndSoundId    = 0;
+	private int mTimerTickStreamId  = 0;
+	private int mAnsweredStreamId   = 0;
+	private int mSkipStreamId       = 0;
+	private int mRoundEndStreamId   = 0;
+	private float curVolume = SettingsHelper.getSoundPref() ? 1 : 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_game);
+
+		AudioAttributes attributes = new AudioAttributes.Builder()
+				.setUsage(AudioAttributes.USAGE_GAME)
+				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+				.build();
+		mSoundPool = new SoundPool.Builder()
+				.setAudioAttributes(attributes)
+				.setMaxStreams(10)
+				.build();
+		mTimerTickSoundId = mSoundPool.load(GameActivity.this, R.raw.timer_single_tick_2, 2);
+		mAnsweredSoundId = mSoundPool.load(GameActivity.this, R.raw.answered, 0);
+		mSkipSoundId = mSoundPool.load(GameActivity.this, R.raw.skip, 0);
+		mRoundEndSoundId = mSoundPool.load(GameActivity.this, R.raw.gong, 1);
 
 		if(getIntent().hasExtra("continue")){
 			Pair<Pair<GameConfig, List<Pair<String, Integer>>>, Integer> data = IOHelper.restoreGame();
@@ -79,12 +118,21 @@ public class GameActivity extends AppCompatActivity {
 		mDoneButton = findViewById(R.id.game_done_button);
 		mCurrentWordText = findViewById(R.id.game_current_word);
 		mWordVisibilityButton = findViewById(R.id.game_word_visibility_button);
+		mHelpButton = findViewById(R.id.game_help_button);
+		mSettingsButton = findViewById(R.id.game_settings_button);
+
+		mSettingsButton.setOnClickListener(v -> {
+			startActivity(new Intent(GameActivity.this, SettingsActivity.class));
+		});
 
 		mWordVisibilityButton.setOnClickListener(v -> {
 			setWordVisibility(!isWordVisible, true);
 		});
 
 		mSkipButton.setOnClickListener(v -> {
+			VibrationHelper.vibrate(VibrationHelper.TYPE_LIGHT);
+			mSkipStreamId = mSoundPool.play(mSkipSoundId, curVolume, curVolume, 0, 0, 1);
+
 			Pair<String, Integer> currentPlayerData = mNamesAndScores.get(mCurrentPlayerIndex);
 			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second - mGameConfig.pointFinePerSkip));
 
@@ -95,6 +143,9 @@ public class GameActivity extends AppCompatActivity {
 			}
 		});
 		mDoneButton.setOnClickListener(v -> {
+			mAnsweredStreamId = mSoundPool.play(mAnsweredSoundId, curVolume, curVolume, 0, 0, 1);
+
+
 			//remove word only if it's answered
 			String word = String.valueOf(mCurrentWordText.getText());
 			mWords.remove(word);
@@ -107,6 +158,18 @@ public class GameActivity extends AppCompatActivity {
 				endRound();
 			}else {
 				loadNewWord();
+			}
+		});
+
+		mHelpButton.setOnClickListener(v -> {
+
+			if(CrocoApplication.isInternetAvailable()) {
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				String wikiLink = "https://ru.wikipedia.org/wiki/" + mCurrentWordText.getText();
+				intent.setData(Uri.parse(wikiLink));
+				startActivity(intent);
+			}else{
+				Toast.makeText(GameActivity.this, "Необходим доступ в интернет.", Toast.LENGTH_LONG).show();
 			}
 		});
 
@@ -128,6 +191,25 @@ public class GameActivity extends AppCompatActivity {
 		calcWords();
 
 		loadReadyScreen();
+	}
+	@Override
+	protected void onStart() {
+		super.onStart();
+
+		applySoundSettings();
+	}
+
+	private void applySoundSettings() {
+		curVolume = SettingsHelper.getSoundPref() ? 1 : 0;
+
+		mSoundPool.setVolume(mTimerTickSoundId, 0, 0);
+		mSoundPool.setVolume(mAnsweredSoundId, curVolume, curVolume);
+		mSoundPool.setVolume(mSkipSoundId, curVolume, curVolume);
+		mSoundPool.setVolume(mRoundEndSoundId, curVolume, curVolume);
+		mSoundPool.setVolume(mTimerTickStreamId, curVolume, curVolume);
+		mSoundPool.setVolume(mAnsweredStreamId, curVolume, curVolume);
+		mSoundPool.setVolume(mSkipStreamId, curVolume, curVolume);
+		mSoundPool.setVolume(mRoundEndStreamId, curVolume, curVolume);
 	}
 
 	private void setWordVisibility(boolean visible, boolean animate){
@@ -167,7 +249,7 @@ public class GameActivity extends AppCompatActivity {
 		String prevWord = String.valueOf(mCurrentWordText.getText());
 		Random random = new Random();
 		String word;
-		do{
+		do {
 			word = mWords.get(Math.abs(random.nextInt()) % mWords.size());
 		} while(word.equals(prevWord));
 
@@ -188,6 +270,8 @@ public class GameActivity extends AppCompatActivity {
 	}
 
 	private void startRound() {
+		mTimerTickStreamId = mSoundPool.play(mTimerTickSoundId, curVolume, curVolume, 2, -1, TIMER_SOUND_MIN_RATE);
+
 		mReadySheet.setVisibility(View.INVISIBLE);
 		mRoundSheet.setVisibility(View.VISIBLE);
 
@@ -195,14 +279,12 @@ public class GameActivity extends AppCompatActivity {
 
 		ValueAnimator timerAnimator = ValueAnimator.ofFloat(mGameConfig.roundDuration, 0f);
 
-		//see https://stackoverflow.com/questions/62903447/time-in-valueanimator-twice-faster-than-real-android/62903624#62903624 for understand
+		//see https://stackoverflow.com/questions/62903447/time-in-valueanimator-twice-faster-than-real-android/62903624#62903624
 		float animationScale = Settings.Global.getFloat(getContentResolver(),
 				Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f);
 		timerAnimator.setDuration((long) (mGameConfig.roundDuration * 1000 / animationScale));
 
 		timerAnimator.setInterpolator(new LinearInterpolator());
-
-		long startTime = System.currentTimeMillis();
 
 		timerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 			@Override
@@ -215,17 +297,48 @@ public class GameActivity extends AppCompatActivity {
 		});
 		timerAnimator.start();
 
+		ValueAnimator timerSoundRateAnimator = ValueAnimator.ofFloat(TIMER_SOUND_MIN_RATE, TIMER_SOUND_MAX_RATE);
+		timerSoundRateAnimator.setInterpolator(new LinearInterpolator());
+		timerSoundRateAnimator.setDuration((long) (TIMER_SOUND_RATE_INCREASING_DURATION * 1000 / animationScale));
+		timerSoundRateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+			@Override
+			public void onAnimationUpdate(ValueAnimator animation) {
+				float rate = (float) animation.getAnimatedValue();
+				mSoundPool.setRate(mTimerTickStreamId, rate);
+				//float volume = (float) (1 + Math.pow(rate - TIMER_SOUND_MIN_RATE, 2));
+				//mSoundPool.setVolume(mTimerTickStreamId, volume, volume);
+			}
+		});
+		mRoundEndHandler.postDelayed(timerSoundRateAnimator::start, (mGameConfig.roundDuration - TIMER_SOUND_RATE_INCREASING_DURATION) * 1000);
+
 		mRoundEndHandler.postDelayed(this::timeUp, mGameConfig.roundDuration * 1000);
 		isRoundFinished = false;
 	}
 
 	private void timeUp(){
+		mSoundPool.stop(mTimerTickStreamId);
+		mRoundEndStreamId = mSoundPool.play(mRoundEndSoundId, curVolume, curVolume, 1, 0, 1);
+
 		isRoundFinished = true;
+
+		VibrationHelper.vibrate(VibrationHelper.TYPE_STRONG);
 	}
 
 	private void endRound() {
+
 		mCurrentPlayerIndex = (mCurrentPlayerIndex + 1) % mGameConfig.playersCount;
 		loadReadyScreen();
 		IOHelper.saveGame(mGameConfig, mNamesAndScores, mCurrentPlayerIndex);
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+
+		mSoundPool.stop(mTimerTickStreamId);
+		mSoundPool.stop(mRoundEndStreamId);
+		mSoundPool.stop(mAnsweredStreamId);
+		mSoundPool.stop(mSkipStreamId);
+		mRoundEndHandler.removeCallbacksAndMessages(null);
 	}
 }

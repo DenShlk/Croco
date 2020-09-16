@@ -18,10 +18,12 @@ public class WordsList implements Serializable {
 	public String description;
 
 	public int resourceId;
+	public int drawableResourceId;
 
-	public WordsList(String name, String description, int resourceId) {
+	public WordsList(String name, String description, int resourceId, int drawableResourceId) {
 		this.name = name;
 		this.description = description;
 		this.resourceId = resourceId;
+		this.drawableResourceId = drawableResourceId;
 	}
 }

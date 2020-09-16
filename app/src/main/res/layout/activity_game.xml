@@ -7,7 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".activities.GameActivity">
 
-
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -25,10 +24,22 @@
             android:paddingEnd="12dp"
             app:contentInsetStart="0dp"
             app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-            app:title="Game"
-            app:titleTextAppearance="@style/TextAppearance.Croco.FredokaFont" />
+            app:title="Игра"
+            app:titleTextAppearance="@style/TextAppearance.Croco.ZelekFont" />
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <ImageView
+        android:id="@+id/game_settings_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="12dp"
+        android:scaleType="fitEnd"
+        app:layout_constraintWidth_percent="0.2"
+        android:src="@drawable/ic_baseline_settings_24"
+        app:layout_constraintBottom_toBottomOf="@+id/appBarLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/game_ready_sheet"
@@ -184,6 +195,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5" />
+
+                <ImageButton
+                    android:id="@+id/game_help_button"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:background="@color/colorBackground"
+                    android:scaleType="fitEnd"
+                    android:src="@drawable/ic_round_help_outline_24"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHeight_percent="0.15"
+                    app:layout_constraintStart_toStartOf="@+id/guideline5"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <TextView
                     android:id="@+id/game_current_word"
                     style="@style/TextAppearance.MaterialComponents.Headline2"
@@ -194,7 +224,7 @@
                     android:lines="1"
                     android:maxLines="2"
                     android:text="momentopatronus"
-                    app:layout_constraintBottom_toBottomOf="@id/game_word_visibility_button"
+                    app:layout_constraintBottom_toTopOf="@+id/game_word_visibility_button"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -205,12 +235,12 @@
                     android:id="@+id/game_word_visibility_button"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:scaleType="fitCenter"
-                    app:layout_constraintHeight_percent="0.15"
                     android:background="@color/colorBackground"
+                    android:scaleType="fitCenter"
                     android:src="@drawable/ic_round_visibility_off_24"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHeight_percent="0.15"
                     app:layout_constraintStart_toStartOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -230,7 +260,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/guideline4"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/guideline3" />
+            app:layout_constraintTop_toTopOf="@+id/guideline3"
+            android:elevation="8dp"/>
 
         <ImageButton
             android:id="@+id/game_done_button"
@@ -245,7 +276,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/guideline4"
-            app:layout_constraintTop_toTopOf="@+id/guideline3" />
+            app:layout_constraintTop_toTopOf="@+id/guideline3"
+            android:elevation="8dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

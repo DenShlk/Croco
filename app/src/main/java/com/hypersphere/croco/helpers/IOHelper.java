@@ -104,6 +104,13 @@ public class IOHelper {
 		return null;
 	}
 
+	static public void clearUsedWords(){
+		File usedWordsListFile = new File(CrocoApplication.filesDir, USED_WORDS_LIST_FILE_NAME);
+		if (usedWordsListFile.exists()) {
+			usedWordsListFile.delete();
+		}
+	}
+
 	static public void addUsedWord(String word){
 		try {
 			File usedWordsListFile = new File(CrocoApplication.filesDir, USED_WORDS_LIST_FILE_NAME);

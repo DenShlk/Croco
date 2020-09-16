@@ -45,8 +45,6 @@ dependencies {
     implementation 'androidx.navigation:navigation-ui:2.2.2'
     implementation 'com.google.code.gson:gson:2.8.6'
 
-    //it is the best dot-indicator in galaxy! you MUST use it.
-    implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:4.1.2'
     //recycler view with over scroll
     implementation 'com.chauthai.overscroll:overscroll-bouncy:0.1.1'
     //view with blur effect
@@ -55,7 +53,19 @@ dependencies {
     //circular progress bar for timer in game round
     implementation 'com.mikhaellopez:circularprogressbar:3.0.3'
 
-    // (just in case)
+    //it is the best dot-indicator in galaxy! you MUST use it.
+    implementation 'com.tbuonomo.andrui:viewpagerdotsindicator:4.1.2'
     //keyboard state detection library
-    //implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:1.0.1'
+    implementation 'net.yslibrary.keyboardvisibilityevent:keyboardvisibilityevent:1.0.1'
+
+    //first view tips
+    implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
+
+    //custom toggle button
+    implementation 'com.jackandphantom.android:customtogglebutton:1.0.1'
+    //another one
+    implementation 'com.github.angads25:toggle:1.1.0'
+
+    //cool seekbar
+    implementation 'com.ramotion.fluidslider:fluid-slider:0.3.1'
 }

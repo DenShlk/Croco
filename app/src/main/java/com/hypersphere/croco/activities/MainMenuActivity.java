@@ -25,7 +25,7 @@ public class MainMenuActivity extends AppCompatActivity {
 		View menuNewGameButton = findViewById(R.id.main_menu_new_game_button);
 		menuContinueButton = findViewById(R.id.main_menu_continue_button);
 		View menuRulesButton = findViewById(R.id.main_menu_rules_button);
-		View menuWordsButton = findViewById(R.id.main_menu_words_button);
+		View menuWordsButton = findViewById(R.id.main_menu_settings_button);
 		View menuSettingsButton = findViewById(R.id.main_menu_settings_button);
 
 		menuNewGameButton.setOnClickListener(v -> {

@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -51,6 +52,7 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 		wordsListHolder.listNameText.setText(dataList.get(position).name);
 		wordsListHolder.listDescriptionText.setText(dataList.get(position).description);
 		wordsListHolder.setChecked(isListCheckedAtInit.get(position));
+		wordsListHolder.listBackgroundImage.setImageResource(dataList.get(position).drawableResourceId);
 	}
 
 	@Override
@@ -72,8 +74,9 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 
 		private View mView;
 
-		public TextView listNameText;
-		public TextView listDescriptionText;
+		TextView listNameText;
+		TextView listDescriptionText;
+		ImageView listBackgroundImage;
 
 		private boolean checked = false;
 
@@ -85,13 +88,14 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 
 			listNameText = mView.findViewById(R.id.words_list_card_name_text);
 			listDescriptionText = mView.findViewById(R.id.words_list_card_description_text);
+			listBackgroundImage = mView.findViewById(R.id.words_list_card_image);
 
 			blurView = mView.findViewById(R.id.words_list_card_blur_view);
 
 			blurView.setupWith((ViewGroup) itemView)
 					.setBlurAlgorithm(new RenderScriptBlur(itemView.getContext()))
-					.setBlurRadius(1f)
-					.setHasFixedTransformationMatrix(true);
+					.setBlurRadius(3f)
+					.setHasFixedTransformationMatrix(false);
 			blurView.setVisibility(View.VISIBLE);
 			blurView.setAlpha(0);
 

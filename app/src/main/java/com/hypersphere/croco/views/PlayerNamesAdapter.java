@@ -1,7 +1,10 @@
 package com.hypersphere.croco.views;
 
+import android.accessibilityservice.AccessibilityService;
 import android.animation.ValueAnimator;
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -25,6 +28,9 @@ import com.google.android.material.button.MaterialButton;
 import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
 import com.hypersphere.croco.helpers.IOHelper;
+
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
 
 import java.util.Collections;
 import java.util.List;
@@ -126,19 +132,43 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 				@Override
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if(actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO){
-						String newName = String.valueOf(mNameEdit.getText());
-
-						update(newName);
-						mNameEdit.clearFocus();
-						mNameText.setVisibility(View.VISIBLE);
-						mNameEdit.setVisibility(View.INVISIBLE);
-						InputMethodManager imm = (InputMethodManager) CrocoApplication.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-						imm.hideSoftInputFromWindow(mNameEdit.getWindowToken(), 0);
+						endEditing();
 					}
 
 					return false;
 				}
 			});
+			KeyboardVisibilityEvent.setEventListener(getActivity(mNameEdit), new KeyboardVisibilityEventListener() {
+				@Override
+				public void onVisibilityChanged(boolean isOpen) {
+					if(!isOpen){
+						endEditing();
+					}
+				}
+			});
+		}
+
+		private void endEditing(){
+			String newName = String.valueOf(mNameEdit.getText());
+
+			update(newName);
+			mNameEdit.clearFocus();
+			mNameText.setVisibility(View.VISIBLE);
+			mNameEdit.setVisibility(View.INVISIBLE);
+			InputMethodManager imm = (InputMethodManager) CrocoApplication.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(mNameEdit.getWindowToken(), 0);
+
+		}
+
+		private Activity getActivity(View v) {
+			Context context = v.getContext();
+			while (context instanceof ContextWrapper) {
+				if (context instanceof Activity) {
+					return (Activity)context;
+				}
+				context = ((ContextWrapper)context).getBaseContext();
+			}
+			return null;
 		}
 		
 		public void onDrag(){

@@ -2,6 +2,8 @@ package com.hypersphere.croco;
 
 import android.app.Application;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.hypersphere.croco.model.WordsList;
 
@@ -39,21 +41,19 @@ public class CrocoApplication extends Application {
 	static public List<WordsList> getAvailableWordsLists(){
 		List<WordsList> list = new ArrayList<>();
 
-		list.add(new WordsList("Базовый", "Обычный набор слов. Например: фантазёр, кетчуп, удача.", R.raw.basic));
-		list.add(new WordsList("Еда", "Кушать подано! Приготовьтесь показывать котлеты по киевски и паннакоту!", R.raw.food));
+		list.add(new WordsList("Базовый", "Обычный набор слов. Например: фантазёр, кетчуп, удача.", R.raw.basic, R.drawable.basic));
+		list.add(new WordsList("Еда", "Кушать подано! Приготовьтесь показывать котлеты по киевски и паннакоту!", R.raw.food, R.drawable.food));
 
 		return list;
 	}
 
-	static public List<Boolean> getCheckedAtInit(){
-		List<Boolean> list = new ArrayList<>(getAvailableWordsLists().size());
+	public static boolean isInternetAvailable() {
+		ConnectivityManager cm =
+				(ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-		for(WordsList wordsList : getAvailableWordsLists()){
-			list.add(false);
-		}
-		// TODO: 08.06.2020 smarter
-		list.set(0, true);
+		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
 
-		return list;
+		return activeNetwork != null &&
+				activeNetwork.isConnectedOrConnecting();
 	}
 }
