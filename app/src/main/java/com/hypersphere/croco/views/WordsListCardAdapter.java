@@ -75,11 +75,14 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 
 	public class WordsListCardViewHolder extends DecoratedRecyclerViewAdapter<WordsListCardViewHolder>.DecoratedViewHolder {
 
+		private static final int CHECKED_ANIMATION_DURATION = 100;
+
 		private View mView;
 
 		TextView listNameText;
 		TextView listDescriptionText;
 		ImageView listBackgroundImage;
+		ImageView listCheckedImage;
 
 		private boolean checked = false;
 
@@ -92,6 +95,7 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 			listNameText = mView.findViewById(R.id.words_list_card_name_text);
 			listDescriptionText = mView.findViewById(R.id.words_list_card_description_text);
 			listBackgroundImage = mView.findViewById(R.id.words_list_card_image);
+			listCheckedImage = mView.findViewById(R.id.words_list_card_checked_image);
 
 			blurView = mView.findViewById(R.id.words_list_card_blur_view);
 
@@ -125,12 +129,26 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 		public void setChecked(boolean checked) {
 			this.checked = checked;
 
-			//visibility animation
+
+			listDescriptionText.animate()
+					.alpha(checked ? 0 : 1)
+					.setDuration(CHECKED_ANIMATION_DURATION)
+					.start();
+			listNameText.animate()
+					.alpha(checked ? 0 : 1)
+					.setDuration(CHECKED_ANIMATION_DURATION)
+					.start();
 			blurView.animate()
-					.alpha(checked ? 1 : 0)
-					.setDuration(100)
+					.alpha(checked ? 0 : 1)
+					.setDuration(CHECKED_ANIMATION_DURATION)
 					.setInterpolator(new AccelerateInterpolator())
 					.start();
+
+			listCheckedImage.animate()
+					.alpha(checked ? 1 : 0)
+					.setDuration(CHECKED_ANIMATION_DURATION)
+					.start();
+
 		}
 
 		public boolean isChecked() {
