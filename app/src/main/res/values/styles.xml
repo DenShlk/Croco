@@ -40,4 +40,8 @@
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
+    <style name="AlertDialog.Croco" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="colorAccent">@color/colorPrimary</item>
+    </style>
+
 </resources>

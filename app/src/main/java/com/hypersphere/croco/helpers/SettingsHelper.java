@@ -7,9 +7,8 @@ import com.google.gson.Gson;
 import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.model.WordsList;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class SettingsHelper {
@@ -23,24 +22,28 @@ public class SettingsHelper {
 	private static SharedPreferences.Editor editor = preferences.edit();
 	private static Gson mGson = new Gson();
 
-	public static void setLastChosenDicts(List<WordsList> chosen){
+	public static void setLastChosenLists(List<WordsList> chosen){
 		List<String> chosenNames = new ArrayList<>();
-		for(WordsList dict : chosen){
-			chosenNames.add(dict.name);
+		for(WordsList list : chosen){
+			chosenNames.add(list.getName());
 		}
 		String data = mGson.toJson(chosenNames);
 		editor.putString(LAST_CHOSEN_DICTS, data);
 		editor.commit();
 	}
 
-	public static List<Boolean> getLastChosenDicts(){
+	public static List<Boolean> getLastChosenLists(){
 		String data = preferences.getString(LAST_CHOSEN_DICTS, "[]");
-		List<String> chosen = Arrays.asList(mGson.fromJson(data, (Type) String[].class));
-		List<WordsList> dicts = CrocoApplication.getAvailableWordsLists();
-		List<Boolean> isChosen = new ArrayList<>(dicts.size());
-		for (int i = 0; i < dicts.size(); i++) {
-			isChosen.add(chosen.contains(dicts.get(i).name));
+		HashSet<String> chosen = mGson.fromJson(data, HashSet.class);
+
+		List<WordsList> lists = CrocoApplication.getAvailableWordsLists();
+
+		List<Boolean> isChosen = new ArrayList<>(lists.size());
+
+		for (WordsList list : lists) {
+			isChosen.add(chosen.contains(list.getName()));
 		}
+
 		return isChosen;
 	}
 

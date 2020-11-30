@@ -7,24 +7,16 @@ import android.net.NetworkInfo;
 
 import com.hypersphere.croco.model.WordsList;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
 
 public class CrocoApplication extends Application {
 
 	public static File filesDir;
 	private static Context context;
+	private static List<WordsList> wordsLists;
 
 	@Override
 	public void onCreate() {
@@ -32,6 +24,18 @@ public class CrocoApplication extends Application {
 		filesDir = getFilesDir();
 
 		context = CrocoApplication.this;
+		initWordsLists();
+	}
+
+	private void initWordsLists(){
+		ArrayList<WordsList> lists = new ArrayList<>();
+
+		lists.add(new WordsList(R.raw.animals, R.drawable.animals));
+		lists.add(new WordsList(R.raw.basic, R.drawable.basic));
+		lists.add(new WordsList(R.raw.food, R.drawable.food));
+		lists.add(new WordsList(R.raw.animals, R.drawable.animals));
+
+		wordsLists = Collections.unmodifiableList(lists);
 	}
 
 	static public Context getContext(){
@@ -39,12 +43,7 @@ public class CrocoApplication extends Application {
 	}
 
 	static public List<WordsList> getAvailableWordsLists(){
-		List<WordsList> list = new ArrayList<>();
-
-		list.add(new WordsList("Базовый", "Обычный набор слов. Например: фантазёр, кетчуп, удача.", R.raw.basic, R.drawable.basic));
-		list.add(new WordsList("Еда", "Кушать подано! Приготовьтесь показывать котлеты по киевски и паннакоту!", R.raw.food, R.drawable.food));
-
-		return list;
+		return wordsLists;
 	}
 
 	public static boolean isInternetAvailable() {

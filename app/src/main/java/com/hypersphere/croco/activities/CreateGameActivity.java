@@ -1,22 +1,19 @@
 package com.hypersphere.croco.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.PagerSnapHelper;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
-import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.angads25.toggle.widget.LabeledSwitch;
 import com.hypersphere.croco.CrocoApplication;
@@ -31,7 +28,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
 import kotlin.jvm.functions.Function1;
 
 /**
@@ -104,12 +100,16 @@ public class CreateGameActivity extends AppCompatActivity {
 
 		PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
 		pagerSnapHelper.attachToRecyclerView(wordsListsRecycler);
-		mWordsListsAdapter = new WordsListCardAdapter(CrocoApplication.getAvailableWordsLists(), SettingsHelper.getLastChosenDicts());
+		mWordsListsAdapter = new WordsListCardAdapter(CrocoApplication.getAvailableWordsLists(), SettingsHelper.getLastChosenLists());
 		mWordsListsAdapter.setInterpolator(new AccelerateDecelerateInterpolator());
+
+		/*
 		if(orientation == Configuration.ORIENTATION_LANDSCAPE)
 			wordsListsRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
 		else
 			wordsListsRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
+		 */
+		wordsListsRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
 		wordsListsRecycler.setAdapter(mWordsListsAdapter);
 
 		customNamesSwitch.setOn(false);
@@ -119,7 +119,7 @@ public class CreateGameActivity extends AppCompatActivity {
 				nextButton.setClickable(false);
 
 				GameConfig config = new GameConfig(mRoundDuration, mPlayersCount, mWordsListsAdapter.getCheckedWordLists());
-				SettingsHelper.setLastChosenDicts(mWordsListsAdapter.getCheckedWordLists());
+				SettingsHelper.setLastChosenLists(mWordsListsAdapter.getCheckedWordLists());
 
 				Intent intent;
 				if(customNamesSwitch.isOn()){

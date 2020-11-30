@@ -13,9 +13,9 @@ import com.google.android.material.card.MaterialCardView;
 import com.hypersphere.croco.R;
 import com.hypersphere.croco.model.WordsList;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.DataFormatException;
 
 import eightbitlab.com.blurview.BlurView;
 import eightbitlab.com.blurview.RenderScriptBlur;
@@ -29,7 +29,10 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 	public WordsListCardAdapter(List<WordsList> dataList, List<Boolean> isListCheckedAtInit) {
 		this.dataList = dataList;
 		this.isListCheckedAtInit = isListCheckedAtInit;
-		//sizes of given lists must be equal
+
+		if(dataList.size()!=isListCheckedAtInit.size()){
+			throw new InvalidParameterException("Sizes of given lists must be equal");
+		}
 	}
 
 	@NonNull
@@ -49,10 +52,10 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 		super.onBindViewHolder(holder, position);
 
 		WordsListCardViewHolder wordsListHolder = (WordsListCardViewHolder) holder;
-		wordsListHolder.listNameText.setText(dataList.get(position).name);
-		wordsListHolder.listDescriptionText.setText(dataList.get(position).description);
+		wordsListHolder.listNameText.setText(dataList.get(position).getName());
+		wordsListHolder.listDescriptionText.setText(dataList.get(position).getDescription());
 		wordsListHolder.setChecked(isListCheckedAtInit.get(position));
-		wordsListHolder.listBackgroundImage.setImageResource(dataList.get(position).drawableResourceId);
+		wordsListHolder.listBackgroundImage.setImageResource(dataList.get(position).getDrawableResourceId());
 	}
 
 	@Override

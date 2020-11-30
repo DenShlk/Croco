@@ -1,10 +1,5 @@
 package com.hypersphere.croco.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.media.AudioAttributes;
@@ -21,8 +16,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
+import com.hypersphere.croco.helpers.IOHelper;
 import com.hypersphere.croco.helpers.SettingsHelper;
 import com.hypersphere.croco.helpers.VibrationHelper;
 import com.hypersphere.croco.model.GameConfig;
@@ -35,8 +37,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-
-import com.hypersphere.croco.helpers.IOHelper;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -67,6 +67,8 @@ public class GameActivity extends AppCompatActivity {
 
 	private Handler mRoundEndHandler = new Handler();
 	private SoundPool mSoundPool;
+	private ValueAnimator timerAnimator;
+	ValueAnimator timerSoundRateAnimator;
 
 	private int mTimerTickSoundId   = 0;
 	private int mAnsweredSoundId    = 0;
@@ -237,7 +239,8 @@ public class GameActivity extends AppCompatActivity {
 
 		Set<String> used = IOHelper.getUsedWords();
 		for (WordsList list : mGameConfig.wordsLists) {
-			for (String word : IOHelper.getListFromRes(list.resourceId)) {
+			List<String> words = list.getWords();
+			for (String word : words) {
 				if (!used.contains(word)) {
 					mWords.add(word);
 				}
@@ -249,6 +252,26 @@ public class GameActivity extends AppCompatActivity {
 		String prevWord = String.valueOf(mCurrentWordText.getText());
 		Random random = new Random();
 		String word;
+		if(mWords.size() == 0){
+			new AlertDialog.Builder(this, R.style.AlertDialog_Croco)
+					.setMessage("Упс, слова кончились!")
+					.setPositiveButton("Вернуться в меню", (dialog, which) -> {
+						dialog.dismiss();
+						finish();
+					})
+					.setNeutralButton("Обнулить и продолжить", (dialog, which) -> {
+						dialog.dismiss();
+						IOHelper.clearUsedWords();
+						calcWords();
+						loadNewWord();
+						resumeRound();
+					})
+					.setCancelable(false)
+					.create()
+					.show();
+			pauseRound();
+			return;
+		}
 		do {
 			word = mWords.get(Math.abs(random.nextInt()) % mWords.size());
 		} while(word.equals(prevWord));
@@ -256,6 +279,28 @@ public class GameActivity extends AppCompatActivity {
 		mCurrentWordText.setText(word);
 
 		setWordVisibility(true, false);
+	}
+
+	long playedTime;
+
+	private void pauseRound() {
+		timerAnimator.pause();
+		timerSoundRateAnimator.pause();
+		mSoundPool.pause(mTimerTickStreamId);
+		playedTime = timerAnimator.getCurrentPlayTime();
+		mRoundEndHandler.removeCallbacksAndMessages(null);
+	}
+
+	private void resumeRound() {
+		timerAnimator.resume();
+		mSoundPool.resume(mTimerTickStreamId);
+		mRoundEndHandler.postDelayed(this::timeUp, mGameConfig.roundDuration * 1000 -  playedTime);
+		if(timerSoundRateAnimator.isPaused()) {
+			timerSoundRateAnimator.resume();
+		}else{
+			mRoundEndHandler.postDelayed(timerSoundRateAnimator::start,
+					(mGameConfig.roundDuration - TIMER_SOUND_RATE_INCREASING_DURATION) * 1000 - playedTime);
+		}
 	}
 
 	private void loadReadyScreen() {
@@ -275,9 +320,7 @@ public class GameActivity extends AppCompatActivity {
 		mReadySheet.setVisibility(View.INVISIBLE);
 		mRoundSheet.setVisibility(View.VISIBLE);
 
-		loadNewWord();
-
-		ValueAnimator timerAnimator = ValueAnimator.ofFloat(mGameConfig.roundDuration, 0f);
+		timerAnimator = ValueAnimator.ofFloat(mGameConfig.roundDuration, 0f);
 
 		//see https://stackoverflow.com/questions/62903447/time-in-valueanimator-twice-faster-than-real-android/62903624#62903624
 		float animationScale = Settings.Global.getFloat(getContentResolver(),
@@ -297,7 +340,7 @@ public class GameActivity extends AppCompatActivity {
 		});
 		timerAnimator.start();
 
-		ValueAnimator timerSoundRateAnimator = ValueAnimator.ofFloat(TIMER_SOUND_MIN_RATE, TIMER_SOUND_MAX_RATE);
+		timerSoundRateAnimator = ValueAnimator.ofFloat(TIMER_SOUND_MIN_RATE, TIMER_SOUND_MAX_RATE);
 		timerSoundRateAnimator.setInterpolator(new LinearInterpolator());
 		timerSoundRateAnimator.setDuration((long) (TIMER_SOUND_RATE_INCREASING_DURATION * 1000 / animationScale));
 		timerSoundRateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -313,6 +356,8 @@ public class GameActivity extends AppCompatActivity {
 
 		mRoundEndHandler.postDelayed(this::timeUp, mGameConfig.roundDuration * 1000);
 		isRoundFinished = false;
+		
+		loadNewWord();
 	}
 
 	private void timeUp(){

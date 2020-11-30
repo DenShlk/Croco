@@ -48,7 +48,7 @@ public class IOHelper {
 		return words;
 	}
 
-	static class GameData {
+	private static class GameData {
 		GameConfig config;
 		List<Pair<String, Integer>> scores;
 		Integer currentPlayerIndex;
