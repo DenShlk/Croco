@@ -1,13 +1,13 @@
 package com.hypersphere.croco.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
-import com.hypersphere.croco.R;
+import androidx.appcompat.app.AppCompatActivity;
 
+import com.hypersphere.croco.R;
+import com.hypersphere.croco.helpers.AnalyticsHelper;
 import com.hypersphere.croco.helpers.IOHelper;
 
 /**
@@ -25,27 +25,30 @@ public class MainMenuActivity extends AppCompatActivity {
 		View menuNewGameButton = findViewById(R.id.main_menu_new_game_button);
 		menuContinueButton = findViewById(R.id.main_menu_continue_button);
 		View menuRulesButton = findViewById(R.id.main_menu_rules_button);
-		View menuWordsButton = findViewById(R.id.main_menu_settings_button);
 		View menuSettingsButton = findViewById(R.id.main_menu_settings_button);
 
 		menuNewGameButton.setOnClickListener(v -> {
+			AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.ClickNewGame);
+
 			Intent intent = new Intent(MainMenuActivity.this, CreateGameActivity.class);
 			startActivity(intent);
 		});
 		menuContinueButton.setOnClickListener(v -> {
+			AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.ClickContinue);
+
 			Intent intent = new Intent(MainMenuActivity.this, GameActivity.class);
 			intent.putExtra("continue", 0);
 			startActivity(intent);
 		});
 		menuRulesButton.setOnClickListener(v -> {
+			AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.ClickRules);
+
 			Intent intent = new Intent(MainMenuActivity.this, RulesActivity.class);
 			startActivity(intent);
 		});
-		menuWordsButton.setOnClickListener(v -> {
-			Intent intent = new Intent(MainMenuActivity.this, WordsRedactorActivity.class);
-			startActivity(intent);
-		});
 		menuSettingsButton.setOnClickListener(v -> {
+			AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.ClickSettings);
+
 			Intent intent = new Intent(MainMenuActivity.this, SettingsActivity.class);
 			startActivity(intent);
 		});

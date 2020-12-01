@@ -21,9 +21,6 @@
         <activity android:name=".activities.ChoosePlayersNamesActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>
-        <activity android:name=".activities.WordsRedactorActivity"
-            android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
         <activity android:name=".activities.RulesActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait"/>

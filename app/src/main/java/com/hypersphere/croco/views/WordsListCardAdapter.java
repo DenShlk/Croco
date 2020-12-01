@@ -13,6 +13,8 @@ import com.google.android.material.card.MaterialCardView;
 import com.hypersphere.croco.R;
 import com.hypersphere.croco.model.WordsList;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 	List<WordsList> dataList;
 	List<WordsListCardViewHolder> holders = new ArrayList<>();
 
-	public WordsListCardAdapter(List<WordsList> dataList, List<Boolean> isListCheckedAtInit) {
+	public WordsListCardAdapter(@NotNull List<WordsList> dataList, @NotNull List<Boolean> isListCheckedAtInit) {
 		this.dataList = dataList;
 		this.isListCheckedAtInit = isListCheckedAtInit;
 
@@ -41,21 +43,46 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 		View itemView = LayoutInflater.from(parent.getContext())
 				.inflate(R.layout.words_list_card_layout, parent, false);
 
-		WordsListCardViewHolder holder = new WordsListCardViewHolder(itemView);
-		holders.add(holder);
+		// check getItemViewType
+		int position = viewType;
+		if(holders.size() > position)
+			return holders.get(position);
+		else {
+			WordsListCardViewHolder holder = new WordsListCardViewHolder(itemView);
 
-		return holder;
+			if(holders.size() != position)
+				throw new InvalidParameterException("Elements must be added one-by-one, from first to last");
+
+			holders.add(holder);
+
+			return holder;
+		}
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		// onCreateViewHolder assumes it
+		return position;
 	}
 
 	@Override
 	public void onBindViewHolder(@NonNull DecoratedViewHolder holder, int position) {
 		super.onBindViewHolder(holder, position);
 
+		WordsList list = dataList.get(position);
+
 		WordsListCardViewHolder wordsListHolder = (WordsListCardViewHolder) holder;
-		wordsListHolder.listNameText.setText(dataList.get(position).getName());
-		wordsListHolder.listDescriptionText.setText(dataList.get(position).getDescription());
+
+		wordsListHolder.listNameText.setText(list.getName());
+		wordsListHolder.listDescriptionText.setText(list.getDescription());
+		wordsListHolder.listBackgroundImage.setImageResource(list.getDrawableResourceId());
+
 		wordsListHolder.setChecked(isListCheckedAtInit.get(position));
-		wordsListHolder.listBackgroundImage.setImageResource(dataList.get(position).getDrawableResourceId());
+	}
+
+	@Override
+	public void onViewRecycled(@NonNull DecoratedViewHolder holder) {
+		super.onViewRecycled(holder);
 	}
 
 	@Override

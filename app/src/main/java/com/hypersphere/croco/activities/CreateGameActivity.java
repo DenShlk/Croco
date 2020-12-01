@@ -17,12 +17,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.angads25.toggle.widget.LabeledSwitch;
 import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
+import com.hypersphere.croco.helpers.AnalyticsHelper;
 import com.hypersphere.croco.helpers.SettingsHelper;
 import com.hypersphere.croco.helpers.TipsHelper;
 import com.hypersphere.croco.model.GameConfig;
+import com.hypersphere.croco.model.WordsList;
 import com.hypersphere.croco.views.WordsListCardAdapter;
 import com.ramotion.fluidslider.FluidSlider;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -118,7 +121,11 @@ public class CreateGameActivity extends AppCompatActivity {
 				nextButton.setClickable(false);
 
 				GameConfig config = new GameConfig(mRoundDuration, mPlayersCount, mWordsListsAdapter.getCheckedWordLists());
-				SettingsHelper.setLastChosenLists(mWordsListsAdapter.getCheckedWordLists());
+				SettingsHelper.setLastChosenLists(config.wordsLists);
+
+				//We don't want to send data we not interested in like player names,
+				// all data about WordsLists
+				sendAnalyticsOnGameCreate(config, customNamesSwitch.isOn());
 
 				Intent intent;
 				if(customNamesSwitch.isOn()){
@@ -139,6 +146,21 @@ public class CreateGameActivity extends AppCompatActivity {
 		toolbar.setNavigationOnClickListener(v -> {
 			finish();
 		});
+	}
+
+	private void sendAnalyticsOnGameCreate(GameConfig config, boolean customNames) {
+		Bundle gameDataBundle = new Bundle();
+		gameDataBundle.putInt("RoundDuration", config.roundDuration);
+		gameDataBundle.putInt("PlayersCount", config.playersCount);
+		gameDataBundle.putBoolean("CustomNames", customNames);
+
+		ArrayList<String> chosenWordsLists = new ArrayList<>();
+		for (WordsList list : config.wordsLists) {
+			chosenWordsLists.add(list.getName());
+		}
+		gameDataBundle.putStringArrayList("ChosenWordsLists", chosenWordsLists);
+
+		AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.CreateGame, gameDataBundle);
 	}
 
 	private void showTips(){

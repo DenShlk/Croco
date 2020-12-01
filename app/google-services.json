@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "903347831518",
+    "firebase_url": "https://croco-7f735.firebaseio.com",
+    "project_id": "croco-7f735",
+    "storage_bucket": "croco-7f735.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:903347831518:android:55981de1b53cd9d968784f",
+        "android_client_info": {
+          "package_name": "com.hypersphere.croco"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "903347831518-7hm8p4sg1s8vpadktou358qgppse29v5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBvvzHxlORJczmqvfxY1-ty-IBeIszoTcc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "903347831518-7hm8p4sg1s8vpadktou358qgppse29v5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.hypersphere.croco.helpers.AnalyticsHelper;
 import com.hypersphere.croco.model.WordsList;
 
 import java.io.File;
@@ -25,6 +26,8 @@ public class CrocoApplication extends Application {
 
 		context = CrocoApplication.this;
 		initWordsLists();
+
+		AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.LaunchApp);
 	}
 
 	private void initWordsLists(){

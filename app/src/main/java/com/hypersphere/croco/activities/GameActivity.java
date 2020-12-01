@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
+import com.hypersphere.croco.helpers.AnalyticsHelper;
 import com.hypersphere.croco.helpers.IOHelper;
 import com.hypersphere.croco.helpers.SettingsHelper;
 import com.hypersphere.croco.helpers.VibrationHelper;
@@ -135,6 +136,9 @@ public class GameActivity extends AppCompatActivity {
 			VibrationHelper.vibrate(VibrationHelper.TYPE_LIGHT);
 			mSkipStreamId = mSoundPool.play(mSkipSoundId, curVolume, curVolume, 0, 0, 1);
 
+			String word = String.valueOf(mCurrentWordText.getText());
+			AnalyticsHelper.sendEventWithWord(AnalyticsHelper.ActionId.SkipWord, word);
+
 			Pair<String, Integer> currentPlayerData = mNamesAndScores.get(mCurrentPlayerIndex);
 			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second - mGameConfig.pointFinePerSkip));
 
@@ -147,11 +151,12 @@ public class GameActivity extends AppCompatActivity {
 		mDoneButton.setOnClickListener(v -> {
 			mAnsweredStreamId = mSoundPool.play(mAnsweredSoundId, curVolume, curVolume, 0, 0, 1);
 
-
 			//remove word only if it's answered
 			String word = String.valueOf(mCurrentWordText.getText());
 			mWords.remove(word);
 			IOHelper.addUsedWord(word);
+
+			AnalyticsHelper.sendEventWithWord(AnalyticsHelper.ActionId.GuessWord, word);
 
 			Pair<String, Integer> currentPlayerData = mNamesAndScores.get(mCurrentPlayerIndex);
 			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second + mGameConfig.pointsPerWord));
@@ -164,10 +169,12 @@ public class GameActivity extends AppCompatActivity {
 		});
 
 		mHelpButton.setOnClickListener(v -> {
+			String word = String.valueOf(mCurrentWordText.getText());
+			AnalyticsHelper.sendEventWithWord(AnalyticsHelper.ActionId.ClickHelpInGame, word);
 
 			if(CrocoApplication.isInternetAvailable()) {
 				Intent intent = new Intent(Intent.ACTION_VIEW);
-				String wikiLink = "https://ru.wikipedia.org/wiki/" + mCurrentWordText.getText();
+				String wikiLink = "https://ru.wikipedia.org/wiki/" + word;
 				intent.setData(Uri.parse(wikiLink));
 				startActivity(intent);
 			}else{
@@ -253,22 +260,9 @@ public class GameActivity extends AppCompatActivity {
 		Random random = new Random();
 		String word;
 		if(mWords.size() == 0){
-			new AlertDialog.Builder(this, R.style.AlertDialog_Croco)
-					.setMessage("Упс, слова кончились!")
-					.setPositiveButton("Вернуться в меню", (dialog, which) -> {
-						dialog.dismiss();
-						finish();
-					})
-					.setNeutralButton("Обнулить и продолжить", (dialog, which) -> {
-						dialog.dismiss();
-						IOHelper.clearUsedWords();
-						calcWords();
-						loadNewWord();
-						resumeRound();
-					})
-					.setCancelable(false)
-					.create()
-					.show();
+			AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.RanOutOfWords);
+			showRanOutOfWordsDialog();
+
 			pauseRound();
 			return;
 		}
@@ -279,6 +273,29 @@ public class GameActivity extends AppCompatActivity {
 		mCurrentWordText.setText(word);
 
 		setWordVisibility(true, false);
+	}
+
+	private void showRanOutOfWordsDialog() {
+		new AlertDialog.Builder(this, R.style.AlertDialog_Croco)
+				.setMessage("Упс, слова кончились!")
+				.setPositiveButton("Вернуться в меню", (dialog, which) -> {
+					AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.LeaveGameAfterRanOutOfWords);
+
+					dialog.dismiss();
+					finish();
+				})
+				.setNeutralButton("Обнулить и продолжить", (dialog, which) -> {
+					AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.ResetWordsAfterRanOut);
+
+					dialog.dismiss();
+					IOHelper.clearUsedWords();
+					calcWords();
+					loadNewWord();
+					resumeRound();
+				})
+				.setCancelable(false)
+				.create()
+				.show();
 	}
 
 	long playedTime;
