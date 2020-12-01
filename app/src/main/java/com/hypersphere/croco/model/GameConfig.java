@@ -1,10 +1,10 @@
 package com.hypersphere.croco.model;
 
+import com.hypersphere.croco.helpers.IOHelper;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.hypersphere.croco.helpers.IOHelper;
 
 public class GameConfig implements Serializable {
 
@@ -19,7 +19,7 @@ public class GameConfig implements Serializable {
 	public final int pointFinePerSkip = 1;
 	public final int roundDuration;
 	public final int playersCount;
-	public List<WordsList> wordsLists;
+	public final List<WordsList> wordsLists;
 	public final List<String> playerNames = new ArrayList<>();
 
 	public GameConfig(int roundDuration, int playersCount, List<WordsList> wordsLists) {

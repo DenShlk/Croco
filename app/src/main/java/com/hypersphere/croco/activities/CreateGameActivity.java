@@ -2,7 +2,6 @@ package com.hypersphere.croco.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
@@ -28,10 +27,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 
 /**
- * Creates @link com.hypersphere.croco.model.GameConfig } from user input.
+ * Creates {@link GameConfig} from user input.
  */
 public class CreateGameActivity extends AppCompatActivity {
 
@@ -43,8 +41,6 @@ public class CreateGameActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_game);
-
-		int orientation = getResources().getConfiguration().orientation;
 
 		RecyclerView wordsListsRecycler = findViewById(R.id.create_game_words_recycler);
 		LabeledSwitch customNamesSwitch = findViewById(R.id.custom_names_switch);
@@ -58,6 +54,7 @@ public class CreateGameActivity extends AppCompatActivity {
 		roundDurationSlider.setStartText(String.valueOf(GameConfig.MIN_ROUND_DURATION));
 		roundDurationSlider.setEndText(String.valueOf(GameConfig.MAX_ROUND_DURATION));
 		roundDurationSlider.setBeginTrackingListener(() -> {
+			roundDurationText.clearAnimation();
 			roundDurationText.animate()
 					.alpha(0f)
 					.setDuration(250)
@@ -65,23 +62,24 @@ public class CreateGameActivity extends AppCompatActivity {
 			return Unit.INSTANCE;
 		});
 		roundDurationSlider.setEndTrackingListener(() -> {
-			new Handler().postDelayed((Runnable) () -> {
+			// delayed animation creates bag when user does double-click - text stays visible under sliders' pointer
+			//new Handler().postDelayed((Runnable) () -> {
+				roundDurationText.clearAnimation();
 				roundDurationText.animate()
 						.alpha(1f)
 						.setDuration(250)
 						.start();
-			}, 200);
+			//}, 200);
 			return Unit.INSTANCE;
 		});
-		roundDurationSlider.setPositionListener(new Function1<Float, Unit>() {
-			@Override
-			public Unit invoke(Float aFloat) {
-				mRoundDuration = (int) (aFloat * (GameConfig.MAX_ROUND_DURATION - GameConfig.MIN_ROUND_DURATION)
-										+ GameConfig.MIN_ROUND_DURATION);
-				mRoundDuration = mRoundDuration / 10 * 10;
-				roundDurationSlider.setBubbleText(mRoundDuration + "с");
-				return Unit.INSTANCE;
-			}
+		roundDurationSlider.setPositionListener(aFloat -> {
+			mRoundDuration = (int) (aFloat * (GameConfig.MAX_ROUND_DURATION - GameConfig.MIN_ROUND_DURATION)
+									+ GameConfig.MIN_ROUND_DURATION);
+
+			mRoundDuration = mRoundDuration / 10 * 10;
+			roundDurationSlider.setBubbleText(mRoundDuration + "с");
+
+			return Unit.INSTANCE;
 		});
 		roundDurationSlider.setPosition(1f * (mRoundDuration - GameConfig.MIN_ROUND_DURATION) /
 				(GameConfig.MAX_ROUND_DURATION - GameConfig.MIN_ROUND_DURATION));
@@ -104,6 +102,7 @@ public class CreateGameActivity extends AppCompatActivity {
 		mWordsListsAdapter.setInterpolator(new AccelerateDecelerateInterpolator());
 
 		/*
+		int orientation = getResources().getConfiguration().orientation;
 		if(orientation == Configuration.ORIENTATION_LANDSCAPE)
 			wordsListsRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
 		else
