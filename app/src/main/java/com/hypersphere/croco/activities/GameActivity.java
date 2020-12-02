@@ -14,7 +14,6 @@ import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +37,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+
+import es.dmoral.toasty.Toasty;
 
 public class GameActivity extends AppCompatActivity {
 
@@ -178,7 +179,7 @@ public class GameActivity extends AppCompatActivity {
 				intent.setData(Uri.parse(wikiLink));
 				startActivity(intent);
 			}else{
-				Toast.makeText(GameActivity.this, "Необходим доступ в интернет.", Toast.LENGTH_LONG).show();
+				Toasty.error(GameActivity.this, "Необходим доступ в интернет.", Toasty.LENGTH_SHORT).show();
 			}
 		});
 

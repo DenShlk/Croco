@@ -6,7 +6,6 @@ import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -30,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
 import kotlin.Unit;
 
 /**
@@ -66,7 +66,7 @@ public class CreateGameActivity extends AppCompatActivity {
 			return Unit.INSTANCE;
 		});
 		roundDurationSlider.setEndTrackingListener(() -> {
-			// delayed animation creates bag when user does double-click - text stays visible under sliders' pointer
+			// delayed animation creates bag when user double-click - text stays visible under sliders' pointer
 			//new Handler().postDelayed((Runnable) () -> {
 				roundDurationText.clearAnimation();
 				roundDurationText.animate()
@@ -197,7 +197,7 @@ public class CreateGameActivity extends AppCompatActivity {
 		if(mWordsListsAdapter.getCheckedWordLists().size() > 0){
 			return true;
 		}else{
-			Toast.makeText(this, "Выберите хотя бы 1 словарь", Toast.LENGTH_LONG).show();
+			Toasty.warning(this, "Выберите хотя бы 1 словарь", Toasty.LENGTH_SHORT).show();
 			return false;
 		}
 	}
