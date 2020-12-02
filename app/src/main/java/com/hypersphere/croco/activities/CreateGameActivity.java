@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.angads25.toggle.widget.LabeledSwitch;
+import com.google.gson.Gson;
 import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
 import com.hypersphere.croco.helpers.AnalyticsHelper;
@@ -46,7 +47,7 @@ public class CreateGameActivity extends AppCompatActivity {
 		setContentView(R.layout.activity_create_game);
 
 		RecyclerView wordsListsRecycler = findViewById(R.id.create_game_words_recycler);
-		LabeledSwitch customNamesSwitch = findViewById(R.id.custom_names_switch);
+		LabeledSwitch customNamesSwitch = findViewById(R.id.create_game_custom_names_switch);
 		View nextButton = findViewById(R.id.create_game_start_button);
 		TextView playersCountText = findViewById(R.id.create_game_players_count_text);
 		ImageButton playersCountLessButton = findViewById(R.id.create_game_players_count_less);
@@ -158,7 +159,8 @@ public class CreateGameActivity extends AppCompatActivity {
 		for (WordsList list : config.wordsLists) {
 			chosenWordsLists.add(list.getName());
 		}
-		gameDataBundle.putStringArrayList("ChosenWordsLists", chosenWordsLists);
+		Gson gson = new Gson();
+		gameDataBundle.putString("ChosenWordsLists", gson.toJson(chosenWordsLists, chosenWordsLists.getClass()));
 
 		AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.CreateGame, gameDataBundle);
 	}
@@ -166,19 +168,29 @@ public class CreateGameActivity extends AppCompatActivity {
 	private void showTips(){
 		List<TipsHelper.Tip> tips = Arrays.asList(
 				new TipsHelper.Tip(
-						"Выберите слова",
-						"Мы создали множество подборок слов по темам, от музыкальных инструментов, до персонажей игры престолов!",
+						"Выберите наборы слов",
+						"Мы создали множество подборок слов по темам, от музыкальных инструментов, до персонажей известных фильмов!",
 						R.id.create_game_words_recycler),
 				new TipsHelper.Tip(
+						"Настройте длительность раунда",
+						"Меняйте это значении в зависимости от сложности слов или количества человек в команде",
+						R.id.create_game_round_duration_layout
+				),
+				new TipsHelper.Tip(
 						"Укажите число комманд",
-						"Мы придумали базовые названия, но вы можете их изменить.",
-						R.id.create_game_players_count_text),
+						"Настройте игру под свою компанию!",
+						R.id.create_game_players_count_layout),
+				new TipsHelper.Tip(
+						"Можно изменить названия команд",
+						"Изначально используются придуманные нами названия, но вы можете изменить их.",
+						R.id.create_game_custom_names_layout
+				),
 				new TipsHelper.Tip(
 						"В игру!",
-						"Желаем удачи",
+						"Желаем удачи!",
 						R.id.create_game_start_button)
 				);
-		TipsHelper.showTips(this, tips.iterator(), true);
+		TipsHelper.showTips(this, tips.iterator());
 	}
 
 	private boolean checkInputCorrectness(){

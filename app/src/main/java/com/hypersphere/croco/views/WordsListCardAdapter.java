@@ -93,8 +93,12 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 	public List<WordsList> getCheckedWordLists(){
 		List<WordsList> list = new ArrayList<>();
 		for (int i = 0; i < getItemCount(); i++) {
-			if(holders.get(i).isChecked()) {
-				list.add(dataList.get(i));
+			if(i>= holders.size()){
+				if(isListCheckedAtInit.get(i))
+					list.add(dataList.get(i));
+			}else {
+				if (holders.get(i).isChecked())
+					list.add(dataList.get(i));
 			}
 		}
 		return list;

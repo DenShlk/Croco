@@ -16,7 +16,8 @@ public class SettingsHelper {
 	private static final String APP_PREFERENCES = "CROCO_APP_PREFS";
 	private static final String SOUND_PREF_NAME = "SOUND_PREF_NAME";
 	private static final String VIBRO_PREF_NAME = "VIBRO_PREF_NAME";
-	private static final String LAST_CHOSEN_DICTS = "LAST_CHOSEN_DICTS";
+	private static final String LAST_CHOSEN_LISTS = "LAST_CHOSEN_LISTS";
+	private static final String TIPS_HAVE_SHOWN = "TIPS_HAVE_SHOWN";
 
 	private static SharedPreferences preferences = CrocoApplication.getContext().getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
 	private static SharedPreferences.Editor editor = preferences.edit();
@@ -28,12 +29,12 @@ public class SettingsHelper {
 			chosenNames.add(list.getName());
 		}
 		String data = mGson.toJson(chosenNames);
-		editor.putString(LAST_CHOSEN_DICTS, data);
+		editor.putString(LAST_CHOSEN_LISTS, data);
 		editor.commit();
 	}
 
 	public static List<Boolean> getLastChosenLists(){
-		String data = preferences.getString(LAST_CHOSEN_DICTS, "[]");
+		String data = preferences.getString(LAST_CHOSEN_LISTS, "[]");
 		HashSet<String> chosen = mGson.fromJson(data, HashSet.class);
 
 		List<WordsList> lists = CrocoApplication.getAvailableWordsLists();
@@ -63,5 +64,14 @@ public class SettingsHelper {
 
 	public static boolean getVibroPref(){
 		return preferences.getBoolean(VIBRO_PREF_NAME, true);
+	}
+
+	public static boolean getHaveTipsShown(){
+		return preferences.getBoolean(TIPS_HAVE_SHOWN, false);
+	}
+
+	public static void setTipsHaveShown(boolean value){
+		editor.putBoolean(TIPS_HAVE_SHOWN, value);
+		editor.commit();
 	}
 }

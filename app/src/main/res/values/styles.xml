@@ -28,6 +28,7 @@
         <item name="android:textSize">40dp</item>
     </style>
 
+    <!--
     <style name="Widget.Croco.Showcase" parent="ShowcaseView">
         <item name="sv_backgroundColor">#CD4CAF50</item>
         <item name="sv_showcaseColor">@color/colorPrimaryDark</item>
@@ -35,6 +36,7 @@
         <item name="sv_tintButtonColor">false</item>
         <item name="sv_titleTextAppearance">@style/TextAppearance.Croco.ShowcaseTitle</item>
     </style>
+    -->
 
     <style name="TextAppearance.Croco.ShowcaseTitle" parent="TextAppearance.MaterialComponents.Headline5">
         <item name="android:textColor">@color/colorAccent</item>

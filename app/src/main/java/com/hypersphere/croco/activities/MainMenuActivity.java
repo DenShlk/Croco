@@ -21,7 +21,6 @@ public class MainMenuActivity extends AppCompatActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main_menu);
-
 		View menuNewGameButton = findViewById(R.id.main_menu_new_game_button);
 		menuContinueButton = findViewById(R.id.main_menu_continue_button);
 		View menuRulesButton = findViewById(R.id.main_menu_rules_button);
@@ -29,7 +28,7 @@ public class MainMenuActivity extends AppCompatActivity {
 
 		menuNewGameButton.setOnClickListener(v -> {
 			AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.ClickNewGame);
-
+			
 			Intent intent = new Intent(MainMenuActivity.this, CreateGameActivity.class);
 			startActivity(intent);
 		});
