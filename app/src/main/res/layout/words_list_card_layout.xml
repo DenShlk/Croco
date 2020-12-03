@@ -49,8 +49,10 @@
                 <View
                     android:id="@+id/view"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="#66FFFFFF" />
+                    android:layout_height="0dp"
+                    android:background="#66FFFFFF"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/words_list_card_name_text"
