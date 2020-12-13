@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -20,9 +21,13 @@ import com.hypersphere.croco.views.PlayerNamesAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class ChoosePlayersNamesActivity extends AppCompatActivity {
+
+	private PlayerNamesAdapter mPlayerNamesAdapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +40,12 @@ public class ChoosePlayersNamesActivity extends AppCompatActivity {
 		namesRecycler.setHasFixedSize(true);
 		namesRecycler.setLayoutManager(new LinearLayoutManager(ChoosePlayersNamesActivity.this, RecyclerView.VERTICAL, false));
 		List<String> namesCopy = new ArrayList<>(config.playerNames);
-		PlayerNamesAdapter adapter = new PlayerNamesAdapter(namesCopy);
-		namesRecycler.setAdapter(adapter);
+		mPlayerNamesAdapter = new PlayerNamesAdapter(namesCopy);
+		namesRecycler.setAdapter(mPlayerNamesAdapter);
 		ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
 			@Override
 			public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-				adapter.swipe(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+				mPlayerNamesAdapter.swipe(viewHolder.getAdapterPosition(), target.getAdapterPosition());
 				return true;
 			}
 
@@ -82,21 +87,52 @@ public class ChoosePlayersNamesActivity extends AppCompatActivity {
 			}
 		});
 		touchHelper.attachToRecyclerView(namesRecycler);
-		adapter.attachToItemTouchHelper(touchHelper);
+		mPlayerNamesAdapter.attachToItemTouchHelper(touchHelper);
 
 		MaterialButton startButton = findViewById(R.id.choose_names_start_button);
 		startButton.setOnClickListener(v -> {
-			Intent intent = new Intent(ChoosePlayersNamesActivity.this, GameActivity.class);
+			if(checkIsInputValid()) {
+				Intent intent = new Intent(ChoosePlayersNamesActivity.this, GameActivity.class);
 
-			GameConfig newConfig = new GameConfig(config.roundDuration, config.playersCount, config.wordsLists, adapter.getPlayerNames());
-			intent.putExtra("gameConfig", newConfig);
-			startActivity(intent);
-			finish();
+				GameConfig newConfig = new GameConfig(config.roundDuration, config.playersCount, config.wordsLists, mPlayerNamesAdapter.getPlayerNames());
+				intent.putExtra("gameConfig", newConfig);
+				startActivity(intent);
+				finish();
+			}else{
+				showDuplicatingNamesDialog();
+			}
 		});
 
 		Toolbar toolbar = findViewById(R.id.app_bar);
 		toolbar.setNavigationOnClickListener(v -> {
 			finish();
 		});
+	}
+
+	private void showDuplicatingNamesDialog() {
+		new AlertDialog.Builder(ChoosePlayersNamesActivity.this, R.style.AlertDialog_Croco)
+				.setTitle("Имена не должны совпадать")
+				.setPositiveButton("ОК", (dialog, which) -> dialog.dismiss())
+				.setCancelable(true)
+				.create()
+				.show();
+	}
+
+	/**
+	 * Check that there are no names duplicates.
+	 * @return
+	 */
+	private boolean checkIsInputValid() {
+		List<String> playerNames = mPlayerNamesAdapter.getPlayerNames();
+		Set<String> namesSet = new HashSet<>();
+
+		for (String name :
+				playerNames) {
+			if (namesSet.contains(name)){
+				return false;
+			}
+			namesSet.add(name);
+		}
+		return true;
 	}
 }
