@@ -42,8 +42,21 @@
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
-    <style name="AlertDialog.Croco" parent="Theme.MaterialComponents.Light.Dialog">
+    <style name="AlertDialog.Croco" parent="Theme.MaterialComponents.Light.Dialog.Alert">
         <item name="colorAccent">@color/colorPrimary</item>
+    </style>
+
+    <style name="Widget.Croco.MaterialButton.PlayerStateView" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="textAllCaps">false</item>
+        <item name="cornerRadius">5dp</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="minHeight">0dp</item>
+        <item name="minWidth">0dp</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
     </style>
 
 </resources>

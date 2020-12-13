@@ -12,4 +12,8 @@
     <color name="colorRedButtonPressed">#B71C1C</color>
     <color name="colorSelectedBackground">#EEE</color>
 
+    <color name="colorPlayerStateMoving">#FFC107</color> <!-- Accent -->
+    <color name="colorPlayerStateMoved">#A2DCA4</color> <!-- Primary Light -->
+    <color name="colorPlayerStateDidNotMove">#FFAAAAAA</color> <!-- android: darker gray -->
+
 </resources>

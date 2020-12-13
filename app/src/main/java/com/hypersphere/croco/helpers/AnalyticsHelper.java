@@ -70,6 +70,8 @@ public class AnalyticsHelper {
 		RanOutOfWords,
 		ResetWordsAfterRanOut,
 		LeaveGameAfterRanOutOfWords,
+		FinishGame,
+		CancelFinishGame,
 	}
 
 }

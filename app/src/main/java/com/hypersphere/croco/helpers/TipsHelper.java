@@ -71,8 +71,6 @@ public class TipsHelper {
 		builder.setTitle(tip.title)
 				.setContentText(tip.text)
 				.setTargetView(activity.findViewById(tip.viewId));
-		// TODO: 02.12.2020 show once
-		//if (single)
 
 		builder.setGuideListener(view -> showTips(activity, tipsIterator));
 

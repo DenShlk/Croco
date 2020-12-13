@@ -6,4 +6,78 @@
     android:layout_height="match_parent"
     tools:context=".activities.RulesActivity">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:paddingStart="0dp"
+            android:paddingEnd="12dp"
+            app:contentInsetStart="0dp"
+            app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
+            app:title="Правила"
+            app:titleTextAppearance="@style/TextAppearance.Croco.ZelekFont" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="8dp">
+
+            <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="О приложении"
+                android:textColor="@color/colorPrimaryDark" />
+
+
+            <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Мы не привязываем наше приложение к конкретным правилам игры. Главное чтобы общая суть сохранялась - кто то загадывает слова, а кто то угадывает. Причем не важно каким способом: показывает, рисует или объясняет.  Задача нашего приложения предложить интересные слова для игры и обеспечить удобный подсчет баллов. "
+                />
+
+            <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="Как играть"
+                android:textColor="@color/colorPrimaryDark"/>
+
+            <TextView
+                style="@style/TextAppearance.MaterialComponents.Headline6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="В общем случае игроки делятся на команды, которые играют по очереди. В каждом раунде один из участников команды объясняет появляющиеся на экране слова, а оставшиеся участники их отгадывают. За каждое отгаданное слово команда получает 2 балла. Если слово угадать не получается - его можно пропустить за 1 штрафной балл. Когда игроки решают закончить игру - побеждает команда, набравшая наибольшее количество баллов. Если игрок не знает значение слова - его можно посмотреть в Википедии, нажав на знак вопроса."
+                />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="100dp"/>
+
+        </LinearLayout>
+    </ScrollView>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

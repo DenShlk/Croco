@@ -13,12 +13,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:autoSizeTextType="uniform"
-        android:text="Player name"
         android:lines="1"
+        android:text="Дейнерис бурерожденная"
         app:layout_constraintBottom_toBottomOf="@id/player_score_item_bottom_line"
-        app:layout_constraintEnd_toStartOf="@+id/player_score_item_score"
+        app:layout_constraintEnd_toStartOf="@+id/player_score_item_player_state_view"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginEnd="10dp"/>
 
     <TextView
         android:id="@+id/player_score_item_score"
@@ -31,6 +32,20 @@
         app:layout_constraintBottom_toBottomOf="@id/player_score_item_bottom_line"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <com.hypersphere.croco.views.PlayerStateView
+        android:id="@+id/player_score_item_player_state_view"
+        style="@style/Widget.Croco.MaterialButton.PlayerStateView"
+        android:layout_width="75dp"
+        android:layout_height="35dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/player_score_item_score"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Сходил"
+        android:textSize="12sp"
+        android:layout_marginEnd="5dp"
+        android:minHeight="0dp"
+        />
 
     <View
         android:id="@+id/player_score_item_bottom_line"

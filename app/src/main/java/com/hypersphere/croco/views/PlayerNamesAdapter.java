@@ -1,15 +1,10 @@
 package com.hypersphere.croco.views;
 
-import android.accessibilityservice.AccessibilityService;
 import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
-import android.view.DragEvent;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,7 +19,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.button.MaterialButton;
 import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
 import com.hypersphere.croco.helpers.IOHelper;
@@ -42,6 +36,7 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 
 	private List<String> mData;
 	private ItemTouchHelper mItemTouchHelper;
+	private PlayerNameHolder holderInEditing;
 
 	public PlayerNamesAdapter(List<String> data) {
 		mData = data;
@@ -72,6 +67,9 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 	}
 
 	public List<String> getPlayerNames(){
+		if(holderInEditing != null)
+			holderInEditing.endEditing();
+
 		return mData;
 	}
 
@@ -98,14 +96,11 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 			mBackground = itemView.findViewById(R.id.player_name_item_background);
 
 			ImageButton mDragButton = itemView.findViewById(R.id.player_name_item_drag_button);
-			mDragButton.setOnTouchListener(new View.OnTouchListener() {
-				@Override
-				public boolean onTouch(View v, MotionEvent event) {
-					if(event.getAction() == MotionEvent.ACTION_DOWN){
-						mItemTouchHelper.startDrag(PlayerNameHolder.this);
-					}
-					return false;
+			mDragButton.setOnTouchListener((v, event) -> {
+				if(event.getAction() == MotionEvent.ACTION_DOWN){
+					mItemTouchHelper.startDrag(PlayerNameHolder.this);
 				}
+				return false;
 			});
 
 			ImageButton editButton = itemView.findViewById(R.id.player_name_item_edit_button);
@@ -117,6 +112,8 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 				mNameEdit.setSelection(mNameEdit.getText().length());
 				InputMethodManager imm = (InputMethodManager) CrocoApplication.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_IMPLICIT);
+
+				holderInEditing = PlayerNameHolder.this;
 			});
 
 			ImageButton randomButton = itemView.findViewById(R.id.player_name_item_random_button);
@@ -128,14 +125,15 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 				update(newName);
 			});
 
-			mNameEdit.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-				@Override
-				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-					if(actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO){
-						endEditing();
-					}
-
-					return false;
+			mNameEdit.setOnEditorActionListener((v, actionId, event) -> {
+				if(actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_GO){
+					endEditing();
+				}
+				return false;
+			});
+			mNameEdit.setOnFocusChangeListener((v, hasFocus) -> {
+				if(!hasFocus){
+					endEditing();
 				}
 			});
 			KeyboardVisibilityEvent.setEventListener(getActivity(mNameEdit), new KeyboardVisibilityEventListener() {
@@ -149,6 +147,9 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 		}
 
 		private void endEditing(){
+			if(holderInEditing == PlayerNameHolder.this){
+				holderInEditing = null;
+			}
 			String newName = String.valueOf(mNameEdit.getText());
 
 			update(newName);

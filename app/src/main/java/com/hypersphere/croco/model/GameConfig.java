@@ -8,7 +8,7 @@ import java.util.List;
 
 public class GameConfig implements Serializable {
 
-	public static final int MIN_ROUND_DURATION = 30;
+	public static final int MIN_ROUND_DURATION = 10;// TODO: 13.12.2020 reset to 30
 	public static final int MAX_ROUND_DURATION = 300;
 	public static final int BASE_ROUND_DURATION = 60;
 	public static final int MIN_PLAYERS_COUNT = 2;
@@ -20,12 +20,13 @@ public class GameConfig implements Serializable {
 	public final int roundDuration;
 	public final int playersCount;
 	public final List<WordsList> wordsLists;
-	public final List<String> playerNames = new ArrayList<>();
+	public final List<String> playerNames;
 
 	public GameConfig(int roundDuration, int playersCount, List<WordsList> wordsLists) {
 		this.roundDuration = roundDuration;
 		this.playersCount = playersCount;
 		this.wordsLists = wordsLists;
+		this.playerNames = new ArrayList<>();
 
 		for (int i = 0; i < playersCount; i++) {
 			String name;
@@ -35,5 +36,12 @@ public class GameConfig implements Serializable {
 
 			playerNames.add(name);
 		}
+	}
+
+	public GameConfig(int roundDuration, int playersCount, List<WordsList> wordsLists, List<String> playerNames) {
+		this.roundDuration = roundDuration;
+		this.playersCount = playersCount;
+		this.wordsLists = wordsLists;
+		this.playerNames = playerNames;
 	}
 }

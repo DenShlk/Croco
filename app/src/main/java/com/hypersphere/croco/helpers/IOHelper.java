@@ -1,11 +1,10 @@
 package com.hypersphere.croco.helpers;
 
-import android.util.Pair;
-
 import com.google.gson.Gson;
 import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
 import com.hypersphere.croco.model.GameConfig;
+import com.hypersphere.croco.model.Player;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -48,20 +47,32 @@ public class IOHelper {
 		return words;
 	}
 
-	private static class GameData {
+	public static class GameData {
+		public GameConfig getConfig() {
+			return config;
+		}
+
+		public List<Player> getPlayers() {
+			return players;
+		}
+
+		public Integer getCurrentPlayerIndex() {
+			return currentPlayerIndex;
+		}
+
 		GameConfig config;
-		List<Pair<String, Integer>> scores;
+		List<Player> players;
 		Integer currentPlayerIndex;
 
-		public GameData(GameConfig config, List<Pair<String, Integer>> scores, Integer currentPlayerIndex) {
+		public GameData(GameConfig config, List<Player> players, Integer currentPlayerIndex) {
 			this.config = config;
-			this.scores = scores;
+			this.players = players;
 			this.currentPlayerIndex = currentPlayerIndex;
 		}
 	}
 
-	static public void saveGame(GameConfig config, List<Pair<String, Integer>> scores, Integer currentPlayerIndex){
-		GameData data = new GameData(config, scores, currentPlayerIndex);
+	static public void saveGame(GameConfig config, List<Player> players, Integer currentPlayerIndex){
+		GameData data = new GameData(config, players, currentPlayerIndex);
 		String stringData = gson.toJson(data);
 
 		try {
@@ -84,7 +95,7 @@ public class IOHelper {
 		return dataFile.exists();
 	}
 
-	static public Pair<Pair<GameConfig, List<Pair<String, Integer>>>, Integer> restoreGame(){
+	static public GameData restoreGame(){
 		try {
 			File dataFile = new File(CrocoApplication.filesDir, LAST_GAME_CONFIG_FILE_NAME);
 			if (!dataFile.exists()) {
@@ -97,7 +108,7 @@ public class IOHelper {
 
 			GameData data = gson.fromJson(stringData, GameData.class);
 
-			return new Pair<>(new Pair<>(data.config, data.scores), data.currentPlayerIndex);
+			return data;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

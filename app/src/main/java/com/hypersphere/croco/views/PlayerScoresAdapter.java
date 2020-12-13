@@ -1,6 +1,5 @@
 package com.hypersphere.croco.views;
 
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +9,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.hypersphere.croco.R;
+import com.hypersphere.croco.model.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,7 +19,7 @@ import java.util.List;
  */
 public class PlayerScoresAdapter extends RecyclerView.Adapter<PlayerScoresAdapter.PlayerScoreHolder> {
 
-	private List<Pair<String, Integer>> mData = new ArrayList<>();
+	private List<Player> mData = new ArrayList<>();
 
 	@NonNull
 	@Override
@@ -34,8 +32,12 @@ public class PlayerScoresAdapter extends RecyclerView.Adapter<PlayerScoresAdapte
 
 	@Override
 	public void onBindViewHolder(@NonNull PlayerScoreHolder holder, int position) {
-		holder.fill(mData.get(position).first, mData.get(position).second);
+		holder.fill(mData.get(position));
 		holder.setLast(position == getItemCount() - 1);
+	}
+
+	public List<Player> getData(){
+		return mData;
 	}
 
 	@Override
@@ -43,15 +45,16 @@ public class PlayerScoresAdapter extends RecyclerView.Adapter<PlayerScoresAdapte
 		return mData.size();
 	}
 
-	public void update(List<Pair<String, Integer>> data){
+	public void update(List<Player> data){
 		mData = data;
 		notifyDataSetChanged();
 	}
 
-	public class PlayerScoreHolder extends RecyclerView.ViewHolder {
+	public static class PlayerScoreHolder extends RecyclerView.ViewHolder {
 
 		private TextView mNameText, mScoreText;
 		private View mBottomLine;
+		protected PlayerStateView mPlayerStateView;
 
 		public PlayerScoreHolder(@NonNull View itemView) {
 			super(itemView);
@@ -59,11 +62,13 @@ public class PlayerScoresAdapter extends RecyclerView.Adapter<PlayerScoresAdapte
 			mNameText = itemView.findViewById(R.id.player_score_item_name);
 			mScoreText = itemView.findViewById(R.id.player_score_item_score);
 			mBottomLine = itemView.findViewById(R.id.player_score_item_bottom_line);
+			mPlayerStateView = itemView.findViewById(R.id.player_score_item_player_state_view);
 		}
 
-		public void fill(String name, Integer score){
-			mNameText.setText(name);
-			mScoreText.setText(String.valueOf(score));
+		public void fill(Player player){
+			mNameText.setText(player.getName());
+			mScoreText.setText(String.valueOf(player.getPoints()));
+			mPlayerStateView.setState(player.getState());
 		}
 
 		public void setLast(boolean isLast){

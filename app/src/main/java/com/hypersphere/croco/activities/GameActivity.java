@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.util.Pair;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.ImageButton;
@@ -28,6 +27,8 @@ import com.hypersphere.croco.helpers.IOHelper;
 import com.hypersphere.croco.helpers.SettingsHelper;
 import com.hypersphere.croco.helpers.VibrationHelper;
 import com.hypersphere.croco.model.GameConfig;
+import com.hypersphere.croco.model.GameResults;
+import com.hypersphere.croco.model.Player;
 import com.hypersphere.croco.model.WordsList;
 import com.hypersphere.croco.views.PlayerScoresAdapter;
 import com.mikhaellopez.circularprogressbar.CircularProgressBar;
@@ -45,7 +46,7 @@ public class GameActivity extends AppCompatActivity {
 	private GameConfig mGameConfig;
 	private List<String> mWords;
 	private int mCurrentPlayerIndex = 0;
-	private List<Pair<String, Integer>> mNamesAndScores = new ArrayList<>();
+	private List<Player> mPlayers = new ArrayList<>();
 	private boolean isRoundFinished = false;
 	private boolean isWordVisible = true;
 
@@ -58,6 +59,7 @@ public class GameActivity extends AppCompatActivity {
 	private View mStartRoundButton;
 	private View mSkipButton;
 	private View mDoneButton;
+	private View mEndGameButton;
 	private TextView mCurrentWordText;
 	private ImageButton mWordVisibilityButton;
 	private ImageButton mHelpButton;
@@ -101,16 +103,19 @@ public class GameActivity extends AppCompatActivity {
 		mRoundEndSoundId = mSoundPool.load(GameActivity.this, R.raw.gong, 1);
 
 		if(getIntent().hasExtra("continue")){
-			Pair<Pair<GameConfig, List<Pair<String, Integer>>>, Integer> data = IOHelper.restoreGame();
-			mGameConfig = data.first.first;
-			mNamesAndScores = data.first.second;
-			mCurrentPlayerIndex = data.second;
+			IOHelper.GameData gameData = IOHelper.restoreGame();
+			mGameConfig = gameData.getConfig();
+			mPlayers = gameData.getPlayers();
+			mCurrentPlayerIndex = gameData.getCurrentPlayerIndex();
 		}else {
 			mGameConfig = (GameConfig) getIntent().getSerializableExtra("gameConfig");
 			for (String name : mGameConfig.playerNames) {
-				mNamesAndScores.add(new Pair<>(name, 0));
+				mPlayers.add(new Player(name));
 			}
 		}
+		// order must be same
+		mPlayers = Collections.unmodifiableList(mPlayers);
+
 
 		mCurrentPlayerNameText = findViewById(R.id.game_current_player_name);
 		mReadySheet = findViewById(R.id.game_ready_sheet);
@@ -120,6 +125,7 @@ public class GameActivity extends AppCompatActivity {
 		mStartRoundButton = findViewById(R.id.game_start_round_button);
 		mSkipButton = findViewById(R.id.game_skip_button);
 		mDoneButton = findViewById(R.id.game_done_button);
+		mEndGameButton = findViewById(R.id.game_end_game_button);
 		mCurrentWordText = findViewById(R.id.game_current_word);
 		mWordVisibilityButton = findViewById(R.id.game_word_visibility_button);
 		mHelpButton = findViewById(R.id.game_help_button);
@@ -140,8 +146,8 @@ public class GameActivity extends AppCompatActivity {
 			String word = String.valueOf(mCurrentWordText.getText());
 			AnalyticsHelper.sendEventWithWord(AnalyticsHelper.ActionId.SkipWord, word);
 
-			Pair<String, Integer> currentPlayerData = mNamesAndScores.get(mCurrentPlayerIndex);
-			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second - mGameConfig.pointFinePerSkip));
+			Player currentPlayer = mPlayers.get(mCurrentPlayerIndex);
+			currentPlayer.addPoints(-mGameConfig.pointFinePerSkip);
 
 			if(isRoundFinished){
 				endRound();
@@ -159,8 +165,8 @@ public class GameActivity extends AppCompatActivity {
 
 			AnalyticsHelper.sendEventWithWord(AnalyticsHelper.ActionId.GuessWord, word);
 
-			Pair<String, Integer> currentPlayerData = mNamesAndScores.get(mCurrentPlayerIndex);
-			mNamesAndScores.set(mCurrentPlayerIndex, new Pair<>(currentPlayerData.first, currentPlayerData.second + mGameConfig.pointsPerWord));
+			Player currentPlayer = mPlayers.get(mCurrentPlayerIndex);
+			currentPlayer.addPoints(mGameConfig.pointsPerWord);
 
 			if(isRoundFinished){
 				endRound();
@@ -186,6 +192,8 @@ public class GameActivity extends AppCompatActivity {
 		mTimerBar.setProgressMax(mGameConfig.roundDuration * 1.0f);
 
 		mStartRoundButton.setOnClickListener(v -> startRound());
+		
+		mEndGameButton.setOnClickListener(v -> showEndGameDialog());
 
 		Toolbar toolbar = findViewById(R.id.app_bar);
 		toolbar.setNavigationOnClickListener(v -> {
@@ -215,7 +223,8 @@ public class GameActivity extends AppCompatActivity {
 		mSoundPool.setVolume(mTimerTickSoundId, 0, 0);
 		mSoundPool.setVolume(mAnsweredSoundId, curVolume, curVolume);
 		mSoundPool.setVolume(mSkipSoundId, curVolume, curVolume);
-		mSoundPool.setVolume(mRoundEndSoundId, curVolume, curVolume);
+		// feels too loud
+		mSoundPool.setVolume(mRoundEndSoundId, curVolume * 0.5f, curVolume * 0.5f);
 		mSoundPool.setVolume(mTimerTickStreamId, curVolume, curVolume);
 		mSoundPool.setVolume(mAnsweredStreamId, curVolume, curVolume);
 		mSoundPool.setVolume(mSkipStreamId, curVolume, curVolume);
@@ -275,6 +284,31 @@ public class GameActivity extends AppCompatActivity {
 
 		setWordVisibility(true, false);
 	}
+	
+	private void showEndGameDialog(){
+		new AlertDialog.Builder(this, R.style.AlertDialog_Croco)
+				.setMessage("Вы уверены что хотите закончить?")
+				.setPositiveButton("Ну ещё чуть-чуть", (dialog, which) -> {
+					AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.CancelFinishGame);
+
+					dialog.dismiss();
+				})
+				.setNeutralButton("Да", (dialog, which) -> {
+					AnalyticsHelper.sendEvent(AnalyticsHelper.ActionId.FinishGame);
+
+					Intent intent = new Intent(GameActivity.this, GameResultsActivity.class);
+					List<Player> scores = mScoresAdapter.getData();
+					GameResults results = new GameResults(scores);
+					intent.putExtra("results", results);
+					startActivity(intent);
+					
+					finish();
+				})
+				.setCancelable(true)
+				.create()
+				.show();
+		
+	}
 
 	private void showRanOutOfWordsDialog() {
 		new AlertDialog.Builder(this, R.style.AlertDialog_Croco)
@@ -325,11 +359,17 @@ public class GameActivity extends AppCompatActivity {
 		mReadySheet.setVisibility(View.VISIBLE);
 		mRoundSheet.setVisibility(View.INVISIBLE);
 
-		mCurrentPlayerNameText.setText(mGameConfig.playerNames.get(mCurrentPlayerIndex));
+		Player currentPlayer = mPlayers.get(mCurrentPlayerIndex);
 
-		Collections.sort(mNamesAndScores, (o1, o2) -> o2.second.compareTo(o1.second));
+		mCurrentPlayerNameText.setText(currentPlayer.getName());
+		currentPlayer.setState(Player.State.Moving);
 
-		mScoresAdapter.update(mNamesAndScores);
+		List<Player> pointSortedPlayers = new ArrayList<>(mPlayers);
+		Collections.sort(pointSortedPlayers, (o1, o2) -> o2.getPoints().compareTo(o1.getPoints()));
+
+		// TODO: 04.12.2020 players with same names warning (in custom names case)
+
+		mScoresAdapter.update(pointSortedPlayers);
 	}
 
 	private void startRound() {
@@ -388,10 +428,23 @@ public class GameActivity extends AppCompatActivity {
 	}
 
 	private void endRound() {
+		mPlayers.get(mCurrentPlayerIndex).setState(Player.State.Moved);
 
-		mCurrentPlayerIndex = (mCurrentPlayerIndex + 1) % mGameConfig.playersCount;
+		mCurrentPlayerIndex++;
+		if(mCurrentPlayerIndex == mGameConfig.playersCount){
+			mCurrentPlayerIndex = 0;
+			
+			for (Player player : mPlayers) {
+				player.setState(Player.State.DidNotMove);
+			}
+
+			mEndGameButton.setVisibility(View.VISIBLE);
+		}else{
+			mEndGameButton.setVisibility(View.GONE);
+		}
+
 		loadReadyScreen();
-		IOHelper.saveGame(mGameConfig, mNamesAndScores, mCurrentPlayerIndex);
+		IOHelper.saveGame(mGameConfig, mPlayers, mCurrentPlayerIndex);
 	}
 
 	@Override

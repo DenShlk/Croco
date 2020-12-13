@@ -173,7 +173,7 @@ public class CreateGameActivity extends AppCompatActivity {
 						R.id.create_game_words_recycler),
 				new TipsHelper.Tip(
 						"Настройте длительность раунда",
-						"Меняйте это значении в зависимости от сложности слов или количества человек в команде",
+						"Меняйте это значении в зависимости от сложности слов или количества человек в команде.",
 						R.id.create_game_round_duration_layout
 				),
 				new TipsHelper.Tip(
@@ -184,12 +184,8 @@ public class CreateGameActivity extends AppCompatActivity {
 						"Можно изменить названия команд",
 						"Изначально используются придуманные нами названия, но вы можете изменить их.",
 						R.id.create_game_custom_names_layout
-				),
-				new TipsHelper.Tip(
-						"В игру!",
-						"Желаем удачи!",
-						R.id.create_game_start_button)
-				);
+				)
+		);
 		TipsHelper.showTips(this, tips.iterator());
 	}
 

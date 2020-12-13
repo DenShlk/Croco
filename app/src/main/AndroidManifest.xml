@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:name=".CrocoApplication"
@@ -14,23 +14,29 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Croco">
+        <activity android:name=".activities.GameResultsActivity"></activity>
         <activity
             android:name=".activities.GameActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
-        <activity android:name=".activities.ChoosePlayersNamesActivity"
+        <activity
+            android:name=".activities.ChoosePlayersNamesActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activities.RulesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.RulesActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activities.SettingsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.SettingsActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activities.CreateGameActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.CreateGameActivity"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
-        <activity android:name=".activities.MainMenuActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.MainMenuActivity"
             android:configChanges="orientation"
             android:screenOrientation="portrait">
             <intent-filter>

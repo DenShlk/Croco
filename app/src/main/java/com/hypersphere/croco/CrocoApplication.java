@@ -18,7 +18,7 @@ public class CrocoApplication extends Application {
 	public static File filesDir;
 	private static Context context;
 	private static List<WordsList> wordsLists;
-
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();

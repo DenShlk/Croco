@@ -1,5 +1,9 @@
 package com.hypersphere.croco.activities;
 
+import android.content.Intent;
+import android.graphics.Canvas;
+import android.os.Bundle;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,20 +12,15 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.graphics.Canvas;
-import android.os.Bundle;
-import android.util.Log;
-
 import com.google.android.material.button.MaterialButton;
 import com.hypersphere.croco.R;
 import com.hypersphere.croco.model.GameConfig;
 import com.hypersphere.croco.views.PlayerNamesAdapter;
-import com.hypersphere.croco.views.PlayerScoresAdapter;
 
 import org.jetbrains.annotations.NotNull;
 
-import javax.crypto.spec.GCMParameterSpec;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ChoosePlayersNamesActivity extends AppCompatActivity {
 
@@ -35,7 +34,8 @@ public class ChoosePlayersNamesActivity extends AppCompatActivity {
 		RecyclerView namesRecycler = findViewById(R.id.choose_names_players_recycler);
 		namesRecycler.setHasFixedSize(true);
 		namesRecycler.setLayoutManager(new LinearLayoutManager(ChoosePlayersNamesActivity.this, RecyclerView.VERTICAL, false));
-		PlayerNamesAdapter adapter = new PlayerNamesAdapter(config.playerNames.subList(0, config.playersCount));
+		List<String> namesCopy = new ArrayList<>(config.playerNames);
+		PlayerNamesAdapter adapter = new PlayerNamesAdapter(namesCopy);
 		namesRecycler.setAdapter(adapter);
 		ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0) {
 			@Override
@@ -87,7 +87,9 @@ public class ChoosePlayersNamesActivity extends AppCompatActivity {
 		MaterialButton startButton = findViewById(R.id.choose_names_start_button);
 		startButton.setOnClickListener(v -> {
 			Intent intent = new Intent(ChoosePlayersNamesActivity.this, GameActivity.class);
-			intent.putExtra("gameConfig", config);
+
+			GameConfig newConfig = new GameConfig(config.roundDuration, config.playersCount, config.wordsLists, adapter.getPlayerNames());
+			intent.putExtra("gameConfig", newConfig);
 			startActivity(intent);
 			finish();
 		});
