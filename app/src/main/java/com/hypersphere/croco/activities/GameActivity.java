@@ -367,8 +367,6 @@ public class GameActivity extends AppCompatActivity {
 		List<Player> pointSortedPlayers = new ArrayList<>(mPlayers);
 		Collections.sort(pointSortedPlayers, (o1, o2) -> o2.getPoints().compareTo(o1.getPoints()));
 
-		// TODO: 04.12.2020 players with same names warning (in custom names case)
-
 		mScoresAdapter.update(pointSortedPlayers);
 	}
 

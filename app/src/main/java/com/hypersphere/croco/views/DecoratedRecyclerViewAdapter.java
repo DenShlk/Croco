@@ -1,30 +1,17 @@
 package com.hypersphere.croco.views;
 
-import android.animation.Animator;
-import android.animation.ValueAnimator;
-import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.Transformation;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.SnapHelper;
 
 import com.chauthai.overscroll.RecyclerViewBouncy;
-
-import java.util.List;
 
 /**
  * Shows center item and part of left and right items. Plays animation on scroll.
  */
-// TODO: 12.07.2020 Define vertical orientation behavior!!!
 abstract class DecoratedRecyclerViewAdapter<VH extends DecoratedRecyclerViewAdapter<VH>.DecoratedViewHolder> extends RecyclerViewBouncy.Adapter<DecoratedRecyclerViewAdapter<VH>.DecoratedViewHolder> {
 
 	protected static final int POSITION_LEFT = 1;

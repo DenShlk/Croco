@@ -8,7 +8,7 @@ import java.util.List;
 
 public class GameConfig implements Serializable {
 
-	public static final int MIN_ROUND_DURATION = 10;// TODO: 13.12.2020 reset to 30
+	public static final int MIN_ROUND_DURATION = 30;
 	public static final int MAX_ROUND_DURATION = 300;
 	public static final int BASE_ROUND_DURATION = 60;
 	public static final int MIN_PLAYERS_COUNT = 2;
