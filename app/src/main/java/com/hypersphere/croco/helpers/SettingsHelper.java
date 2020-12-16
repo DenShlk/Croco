@@ -5,47 +5,34 @@ import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
 import com.hypersphere.croco.CrocoApplication;
-import com.hypersphere.croco.model.WordsList;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import com.hypersphere.croco.model.GameConfig;
 
 public class SettingsHelper {
 
 	private static final String APP_PREFERENCES = "CROCO_APP_PREFS";
 	private static final String SOUND_PREF_NAME = "SOUND_PREF_NAME";
 	private static final String VIBRO_PREF_NAME = "VIBRO_PREF_NAME";
-	private static final String LAST_CHOSEN_LISTS = "LAST_CHOSEN_LISTS";
+	private static final String LAST_CHOSEN_SETTINGS = "LAST_CHOSEN_SETTINGS";
 	private static final String TIPS_HAVE_SHOWN = "TIPS_HAVE_SHOWN";
 
 	private static SharedPreferences preferences = CrocoApplication.getContext().getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
 	private static SharedPreferences.Editor editor = preferences.edit();
 	private static Gson mGson = new Gson();
 
-	public static void setLastChosenLists(List<WordsList> chosen){
-		List<String> chosenNames = new ArrayList<>();
-		for(WordsList list : chosen){
-			chosenNames.add(list.getName());
-		}
-		String data = mGson.toJson(chosenNames);
-		editor.putString(LAST_CHOSEN_LISTS, data);
+	public static void setLastGameSettings(GameConfig config){
+		String data = mGson.toJson(config);
+		editor.putString(LAST_CHOSEN_SETTINGS, data);
 		editor.commit();
 	}
 
-	public static List<Boolean> getLastChosenLists(){
-		String data = preferences.getString(LAST_CHOSEN_LISTS, "[]");
-		HashSet<String> chosen = mGson.fromJson(data, HashSet.class);
-
-		List<WordsList> lists = CrocoApplication.getAvailableWordsLists();
-
-		List<Boolean> isChosen = new ArrayList<>(lists.size());
-
-		for (WordsList list : lists) {
-			isChosen.add(chosen.contains(list.getName()));
+	public static GameConfig getLastGameSettings(){
+		String data = preferences.getString(LAST_CHOSEN_SETTINGS, null);
+		if(data == null){
+			return GameConfig.getBaseConfig();
 		}
 
-		return isChosen;
+		GameConfig config = mGson.fromJson(data, GameConfig.class);
+		return config;
 	}
 
 	public static void setSoundPref(boolean value){

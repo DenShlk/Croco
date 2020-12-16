@@ -44,4 +44,12 @@ public class GameConfig implements Serializable {
 		this.wordsLists = wordsLists;
 		this.playerNames = playerNames;
 	}
+
+	/**
+	 * Creates a {@link GameConfig} with default values.
+	 * @return {@link GameConfig} with default values.
+	 */
+	public static GameConfig getBaseConfig(){
+		return new GameConfig(BASE_ROUND_DURATION, BASE_PLAYERS_COUNT, new ArrayList<>());
+	}
 }

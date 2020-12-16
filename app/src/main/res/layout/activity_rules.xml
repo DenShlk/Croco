@@ -23,7 +23,7 @@
             android:paddingEnd="12dp"
             app:contentInsetStart="0dp"
             app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
-            app:title="Правила"
+            app:title="Помощь"
             app:titleTextAppearance="@style/TextAppearance.Croco.ZelekFont" />
 
     </com.google.android.material.appbar.AppBarLayout>

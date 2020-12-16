@@ -6,7 +6,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -25,6 +24,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import es.dmoral.toasty.Toasty;
+
+/**
+ * Allows to set custom names to user
+ */
+// TODO: 16.12.2020 return ok if game started or cancel otherwise
 public class ChoosePlayersNamesActivity extends AppCompatActivity {
 
 	private PlayerNamesAdapter mPlayerNamesAdapter;
@@ -94,12 +99,15 @@ public class ChoosePlayersNamesActivity extends AppCompatActivity {
 			if(checkIsInputValid()) {
 				Intent intent = new Intent(ChoosePlayersNamesActivity.this, GameActivity.class);
 
-				GameConfig newConfig = new GameConfig(config.roundDuration, config.playersCount, config.wordsLists, mPlayerNamesAdapter.getPlayerNames());
+				GameConfig newConfig = new GameConfig(config.roundDuration, config.playersCount,
+						config.wordsLists, mPlayerNamesAdapter.getPlayerNames());
 				intent.putExtra("gameConfig", newConfig);
 				startActivity(intent);
+
+				setResult(RESULT_OK);
 				finish();
 			}else{
-				showDuplicatingNamesDialog();
+				Toasty.warning(this, "Имена не дожны совпадать", Toasty.LENGTH_SHORT).show();
 			}
 		});
 
@@ -107,15 +115,6 @@ public class ChoosePlayersNamesActivity extends AppCompatActivity {
 		toolbar.setNavigationOnClickListener(v -> {
 			finish();
 		});
-	}
-
-	private void showDuplicatingNamesDialog() {
-		new AlertDialog.Builder(ChoosePlayersNamesActivity.this, R.style.AlertDialog_Croco)
-				.setTitle("Имена не должны совпадать")
-				.setPositiveButton("ОК", (dialog, which) -> dialog.dismiss())
-				.setCancelable(true)
-				.create()
-				.show();
 	}
 
 	/**

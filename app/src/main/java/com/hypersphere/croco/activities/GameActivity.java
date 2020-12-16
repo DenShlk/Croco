@@ -89,18 +89,7 @@ public class GameActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_game);
 
-		AudioAttributes attributes = new AudioAttributes.Builder()
-				.setUsage(AudioAttributes.USAGE_GAME)
-				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-				.build();
-		mSoundPool = new SoundPool.Builder()
-				.setAudioAttributes(attributes)
-				.setMaxStreams(10)
-				.build();
-		mTimerTickSoundId = mSoundPool.load(GameActivity.this, R.raw.timer_single_tick_2, 2);
-		mAnsweredSoundId = mSoundPool.load(GameActivity.this, R.raw.answered, 0);
-		mSkipSoundId = mSoundPool.load(GameActivity.this, R.raw.skip, 0);
-		mRoundEndSoundId = mSoundPool.load(GameActivity.this, R.raw.gong, 1);
+		adjustAudio();
 
 		if(getIntent().hasExtra("continue")){
 			IOHelper.GameData gameData = IOHelper.restoreGame();
@@ -108,6 +97,7 @@ public class GameActivity extends AppCompatActivity {
 			mPlayers = gameData.getPlayers();
 			mCurrentPlayerIndex = gameData.getCurrentPlayerIndex();
 		}else {
+			// TODO: 16.12.2020 refactor idea: create SavingsHelper and move there all saving staff
 			mGameConfig = (GameConfig) getIntent().getSerializableExtra("gameConfig");
 			for (String name : mGameConfig.playerNames) {
 				mPlayers.add(new Player(name));
@@ -138,6 +128,36 @@ public class GameActivity extends AppCompatActivity {
 		mWordVisibilityButton.setOnClickListener(v -> {
 			setWordVisibility(!isWordVisible, true);
 		});
+
+		adjustGameButtons();
+
+		mTimerBar.setProgressMax(mGameConfig.roundDuration * 1.0f);
+
+		mStartRoundButton.setOnClickListener(v -> startRound());
+		
+		mEndGameButton.setOnClickListener(v -> showEndGameDialog());
+
+		Toolbar toolbar = findViewById(R.id.app_bar);
+		toolbar.setNavigationOnClickListener(v -> {
+			finish();
+		});
+
+		RecyclerView scoresRecycler = findViewById(R.id.game_scores_recycler);
+		scoresRecycler.setHasFixedSize(true);
+		scoresRecycler.setLayoutManager(new LinearLayoutManager(GameActivity.this, RecyclerView.VERTICAL, false));
+		mScoresAdapter = new PlayerScoresAdapter();
+		scoresRecycler.setAdapter(mScoresAdapter);
+
+		calcWords();
+
+		loadReadyScreen();
+	}
+
+	/**
+	 * Sets {@link android.view.View.OnClickListener} for game buttons such as skip, answered and
+	 * help buttons.
+	 */
+	private void adjustGameButtons() {
 
 		mSkipButton.setOnClickListener(v -> {
 			VibrationHelper.vibrate(VibrationHelper.TYPE_LIGHT);
@@ -188,28 +208,30 @@ public class GameActivity extends AppCompatActivity {
 				Toasty.error(GameActivity.this, "Необходим доступ в интернет.", Toasty.LENGTH_SHORT).show();
 			}
 		});
-
-		mTimerBar.setProgressMax(mGameConfig.roundDuration * 1.0f);
-
-		mStartRoundButton.setOnClickListener(v -> startRound());
-		
-		mEndGameButton.setOnClickListener(v -> showEndGameDialog());
-
-		Toolbar toolbar = findViewById(R.id.app_bar);
-		toolbar.setNavigationOnClickListener(v -> {
-			finish();
-		});
-
-		RecyclerView scoresRecycler = findViewById(R.id.game_scores_recycler);
-		scoresRecycler.setHasFixedSize(true);
-		scoresRecycler.setLayoutManager(new LinearLayoutManager(GameActivity.this, RecyclerView.VERTICAL, false));
-		mScoresAdapter = new PlayerScoresAdapter();
-		scoresRecycler.setAdapter(mScoresAdapter);
-
-		calcWords();
-
-		loadReadyScreen();
 	}
+
+	/**
+	 * Sets {@link AudioAttributes} for {@code mSoundPool} and loads sound clips to it.
+	 */
+	private void adjustAudio() {
+		AudioAttributes attributes = new AudioAttributes.Builder()
+				.setUsage(AudioAttributes.USAGE_GAME)
+				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+				.build();
+		mSoundPool = new SoundPool.Builder()
+				.setAudioAttributes(attributes)
+				.setMaxStreams(10)
+				.build();
+		mTimerTickSoundId = mSoundPool.load(GameActivity.this, R.raw.timer_single_tick_2, 2);
+		mAnsweredSoundId = mSoundPool.load(GameActivity.this, R.raw.answered, 0);
+		mSkipSoundId = mSoundPool.load(GameActivity.this, R.raw.skip, 0);
+		mRoundEndSoundId = mSoundPool.load(GameActivity.this, R.raw.gong, 1);
+	}
+
+	/**
+	 * Applies sound settings, because it might be called after
+	 * returning from {@link SettingsActivity}.
+	 */
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -368,6 +390,9 @@ public class GameActivity extends AppCompatActivity {
 		Collections.sort(pointSortedPlayers, (o1, o2) -> o2.getPoints().compareTo(o1.getPoints()));
 
 		mScoresAdapter.update(pointSortedPlayers);
+
+		// game should be saved every round and on the start (probably rewriten)
+		IOHelper.saveGame(mGameConfig, mPlayers, mCurrentPlayerIndex);
 	}
 
 	private void startRound() {
@@ -442,7 +467,6 @@ public class GameActivity extends AppCompatActivity {
 		}
 
 		loadReadyScreen();
-		IOHelper.saveGame(mGameConfig, mPlayers, mCurrentPlayerIndex);
 	}
 
 	@Override

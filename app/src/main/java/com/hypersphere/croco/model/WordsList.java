@@ -8,15 +8,29 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Presents list of words for game (aka dict). Words can be given by calling {@code getWords}.
+ * On call of that method class gets list of words from resources if it has not done yet.
+ *
+ * Fields {@code unpacked} and {@code words} marked as transient to avoid saving (through gson)
+ * or serialize unnecessary data.
+ */
 public class WordsList implements Serializable {
 
 	private int resourceId;
 	private int drawableResourceId;
 
-	private boolean unpacked;
 	private String name;
 	private String description;
-	private List<String> words;
+
+	/**
+	 * Marked as transient to avoid saving (through gson) or serialize unnecessary data.
+	 */
+	private transient boolean unpacked = false;
+	/**
+	 * Marked as transient to avoid saving (through gson) or serialize unnecessary data.
+	 */
+	private transient List<String> words;
 
 	public WordsList(int resourceId, int drawableResourceId){
 		this.resourceId = resourceId;

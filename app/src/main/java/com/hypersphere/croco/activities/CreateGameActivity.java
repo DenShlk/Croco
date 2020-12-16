@@ -7,6 +7,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -27,6 +28,7 @@ import com.ramotion.fluidslider.FluidSlider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import es.dmoral.toasty.Toasty;
@@ -37,58 +39,37 @@ import kotlin.Unit;
  */
 public class CreateGameActivity extends AppCompatActivity {
 
+	private static final int CHOOSE_PLAYERS_NAMES_ACTIVITY_REQUEST_CODE = 833;
+
+	private TextView mRoundDurationText;
+	private FluidSlider mRoundDurationSlider;
+	private View mNextButton;
+
 	private WordsListCardAdapter mWordsListsAdapter;
-	private int mPlayersCount = GameConfig.BASE_PLAYERS_COUNT;
-	private int mRoundDuration = GameConfig.BASE_ROUND_DURATION;
+	private int mPlayersCount;
+	private int mRoundDuration;
+	private HashSet<String> mLastChosenWordListsNames;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_game);
 
+		restoreLastSettings();
+
 		RecyclerView wordsListsRecycler = findViewById(R.id.create_game_words_recycler);
 		LabeledSwitch customNamesSwitch = findViewById(R.id.create_game_custom_names_switch);
-		View nextButton = findViewById(R.id.create_game_start_button);
+		mNextButton = findViewById(R.id.create_game_start_button);
 		TextView playersCountText = findViewById(R.id.create_game_players_count_text);
 		ImageButton playersCountLessButton = findViewById(R.id.create_game_players_count_less);
 		ImageButton playersCountMoreButton = findViewById(R.id.create_game_players_count_more);
-		TextView roundDurationText = findViewById(R.id.create_game_round_duration_text);
-		FluidSlider roundDurationSlider = findViewById(R.id.create_game_round_duration_slider);
+		mRoundDurationText = findViewById(R.id.create_game_round_duration_text);
+		mRoundDurationSlider = findViewById(R.id.create_game_round_duration_slider);
 
-		roundDurationSlider.setStartText(String.valueOf(GameConfig.MIN_ROUND_DURATION));
-		roundDurationSlider.setEndText(String.valueOf(GameConfig.MAX_ROUND_DURATION));
-		roundDurationSlider.setBeginTrackingListener(() -> {
-			roundDurationText.clearAnimation();
-			roundDurationText.animate()
-					.alpha(0f)
-					.setDuration(250)
-					.start();
-			return Unit.INSTANCE;
-		});
-		roundDurationSlider.setEndTrackingListener(() -> {
-			// delayed animation creates bag when user double-click - text stays visible under sliders' pointer
-			//new Handler().postDelayed((Runnable) () -> {
-				roundDurationText.clearAnimation();
-				roundDurationText.animate()
-						.alpha(1f)
-						.setDuration(250)
-						.start();
-			//}, 200);
-			return Unit.INSTANCE;
-		});
-		roundDurationSlider.setPositionListener(aFloat -> {
-			mRoundDuration = (int) (aFloat * (GameConfig.MAX_ROUND_DURATION - GameConfig.MIN_ROUND_DURATION)
-									+ GameConfig.MIN_ROUND_DURATION);
-
-			mRoundDuration = mRoundDuration / 10 * 10;
-			roundDurationSlider.setBubbleText(mRoundDuration + "с");
-
-			return Unit.INSTANCE;
-		});
-		roundDurationSlider.setPosition(1f * (mRoundDuration - GameConfig.MIN_ROUND_DURATION) /
-				(GameConfig.MAX_ROUND_DURATION - GameConfig.MIN_ROUND_DURATION));
+		adjustRoundDurationSlider();
 
 		playersCountText.setText(String.valueOf(mPlayersCount));
+
 		playersCountLessButton.setOnClickListener(v -> {
 			if(mPlayersCount > GameConfig.MIN_PLAYERS_COUNT){
 				playersCountText.setText(String.valueOf(--mPlayersCount));
@@ -102,42 +83,39 @@ public class CreateGameActivity extends AppCompatActivity {
 
 		PagerSnapHelper pagerSnapHelper = new PagerSnapHelper();
 		pagerSnapHelper.attachToRecyclerView(wordsListsRecycler);
-		mWordsListsAdapter = new WordsListCardAdapter(CrocoApplication.getAvailableWordsLists(), SettingsHelper.getLastChosenLists());
+		mWordsListsAdapter = new WordsListCardAdapter(CrocoApplication.getAvailableWordsLists(), mLastChosenWordListsNames);
 		mWordsListsAdapter.setInterpolator(new AccelerateDecelerateInterpolator());
 
-		/*
-		int orientation = getResources().getConfiguration().orientation;
-		if(orientation == Configuration.ORIENTATION_LANDSCAPE)
-			wordsListsRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-		else
-			wordsListsRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
-		 */
 		wordsListsRecycler.setLayoutManager(new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false));
 		wordsListsRecycler.setAdapter(mWordsListsAdapter);
 
 		customNamesSwitch.setOn(false);
 
-		nextButton.setOnClickListener(v -> {
+		mNextButton.setOnClickListener(v -> {
 			if(checkInputCorrectness()){
-				nextButton.setClickable(false);
+				mNextButton.setClickable(false);
 
 				GameConfig config = new GameConfig(mRoundDuration, mPlayersCount, mWordsListsAdapter.getCheckedWordLists());
-				SettingsHelper.setLastChosenLists(config.wordsLists);
 
-				//We don't want to send data we not interested in like player names,
+				//We don't want to send data we not interested in, like player names,
 				// all data about WordsLists
 				sendAnalyticsOnGameCreate(config, customNamesSwitch.isOn());
 
 				Intent intent;
 				if(customNamesSwitch.isOn()){
 					intent = new Intent(CreateGameActivity.this, ChoosePlayersNamesActivity.class);
-				}else{
-					intent = new Intent(CreateGameActivity.this, GameActivity.class);
-				}
-				intent.putExtra("gameConfig", config);
 
-				startActivity(intent);
-				finish();
+					intent.putExtra("gameConfig", config);
+					startActivityForResult(intent, CHOOSE_PLAYERS_NAMES_ACTIVITY_REQUEST_CODE);
+				}else{
+					//create game skipping choosing names and finishing this activity just after
+					intent = new Intent(CreateGameActivity.this, GameActivity.class);
+
+					intent.putExtra("gameConfig", config);
+					startActivity(intent);
+					finish();
+				}
+
 			}
 		});
 
@@ -147,6 +125,75 @@ public class CreateGameActivity extends AppCompatActivity {
 		toolbar.setNavigationOnClickListener(v -> {
 			finish();
 		});
+	}
+
+	/**
+	 * Gets result from {@link ChoosePlayersNamesActivity}. If it is {@code RESULT_OK} game started
+	 * and this activity should be finished, otherwise user returned from
+	 * {@link ChoosePlayersNamesActivity} to change some settings (at least we expect so).
+	 * @param requestCode
+	 * @param resultCode
+	 * @param data
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+
+		if(requestCode == CHOOSE_PLAYERS_NAMES_ACTIVITY_REQUEST_CODE){
+			if(resultCode == RESULT_OK){
+				// game started
+				finish();
+			}else{
+				// next button was disabled to prevent multi starting of activities
+				mNextButton.setClickable(true);
+			}
+		}
+	}
+
+	private void restoreLastSettings() {
+		GameConfig lastConfig = SettingsHelper.getLastGameSettings();
+		mRoundDuration = lastConfig.roundDuration;
+		mPlayersCount = lastConfig.playersCount;
+		mLastChosenWordListsNames = new HashSet<>();
+		for (WordsList wordsList : lastConfig.wordsLists) {
+			mLastChosenWordListsNames.add(wordsList.getName());
+		}
+	}
+
+	private void adjustRoundDurationSlider() {
+
+		mRoundDurationSlider.setStartText(String.valueOf(GameConfig.MIN_ROUND_DURATION));
+		mRoundDurationSlider.setEndText(String.valueOf(GameConfig.MAX_ROUND_DURATION));
+		mRoundDurationSlider.setBeginTrackingListener(() -> {
+			mRoundDurationText.clearAnimation();
+			mRoundDurationText.animate()
+					.alpha(0f)
+					.setDuration(250)
+					.start();
+			return Unit.INSTANCE;
+		});
+		mRoundDurationSlider.setEndTrackingListener(() -> {
+			// delayed animation creates bag when user double-click - text stays visible under sliders' pointer
+			//new Handler().postDelayed((Runnable) () -> {
+			mRoundDurationText.clearAnimation();
+			mRoundDurationText.animate()
+					.alpha(1f)
+					.setDuration(250)
+					.start();
+			//}, 200);
+			return Unit.INSTANCE;
+		});
+		mRoundDurationSlider.setPositionListener(aFloat -> {
+			mRoundDuration = (int) (aFloat * (GameConfig.MAX_ROUND_DURATION - GameConfig.MIN_ROUND_DURATION)
+					+ GameConfig.MIN_ROUND_DURATION);
+
+			mRoundDuration = mRoundDuration / 10 * 10;
+			mRoundDurationSlider.setBubbleText(mRoundDuration + "с");
+
+			return Unit.INSTANCE;
+		});
+		mRoundDurationSlider.setPosition(1f * (mRoundDuration - GameConfig.MIN_ROUND_DURATION) /
+				(GameConfig.MAX_ROUND_DURATION - GameConfig.MIN_ROUND_DURATION));
 	}
 
 	private void sendAnalyticsOnGameCreate(GameConfig config, boolean customNames) {
@@ -196,5 +243,16 @@ public class CreateGameActivity extends AppCompatActivity {
 			Toasty.warning(this, "Выберите хотя бы 1 словарь", Toasty.LENGTH_SHORT).show();
 			return false;
 		}
+	}
+
+	/**
+	 * Saves current settings after each closing of activity.
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+
+		GameConfig config = new GameConfig(mRoundDuration, mPlayersCount, mWordsListsAdapter.getCheckedWordLists());
+		SettingsHelper.setLastGameSettings(config);
 	}
 }

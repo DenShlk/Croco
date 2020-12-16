@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import eightbitlab.com.blurview.BlurView;
@@ -24,17 +25,13 @@ import eightbitlab.com.blurview.RenderScriptBlur;
 
 public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsListCardAdapter.WordsListCardViewHolder> {
 
-	List<Boolean> isListCheckedAtInit;
+	HashSet<String> checkedAtInitNames;
 	List<WordsList> dataList;
 	List<WordsListCardViewHolder> holders = new ArrayList<>();
 
-	public WordsListCardAdapter(@NotNull List<WordsList> dataList, @NotNull List<Boolean> isListCheckedAtInit) {
+	public WordsListCardAdapter(@NotNull List<WordsList> dataList, @NotNull HashSet<String> checkedAtInitNames) {
 		this.dataList = dataList;
-		this.isListCheckedAtInit = isListCheckedAtInit;
-
-		if(dataList.size()!=isListCheckedAtInit.size()){
-			throw new InvalidParameterException("Sizes of given lists must be equal");
-		}
+		this.checkedAtInitNames = checkedAtInitNames;
 	}
 
 	@NonNull
@@ -45,12 +42,12 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 
 		// check getItemViewType
 		int position = viewType;
-		if(holders.size() > position)
+		if (holders.size() > position)
 			return holders.get(position);
 		else {
 			WordsListCardViewHolder holder = new WordsListCardViewHolder(itemView);
 
-			if(holders.size() != position)
+			if (holders.size() != position)
 				throw new InvalidParameterException("Elements must be added one-by-one, from first to last");
 
 			holders.add(holder);
@@ -77,7 +74,7 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 		wordsListHolder.listDescriptionText.setText(list.getDescription());
 		wordsListHolder.listBackgroundImage.setImageResource(list.getDrawableResourceId());
 
-		wordsListHolder.setChecked(isListCheckedAtInit.get(position));
+		wordsListHolder.setChecked(checkedAtInitNames.contains(list.getName()));
 	}
 
 	@Override
@@ -90,14 +87,22 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 		return dataList.size();
 	}
 
-	public List<WordsList> getCheckedWordLists(){
+	// TODO: 16.12.2020 test
+
+	/**
+	 * Iterates through items of recycler view and returns checked elements. If item was not viewed
+	 * and binded checks if {@code checkedAtInitNames} contains it.
+	 * @return checked elements of this recycler.
+	 */
+	public List<WordsList> getCheckedWordLists() {
 		List<WordsList> list = new ArrayList<>();
 		for (int i = 0; i < getItemCount(); i++) {
-			if(i>= holders.size()){
-				if(isListCheckedAtInit.get(i))
+			if (i >= holders.size()) {
+				String name = dataList.get(i).getName();
+				if (checkedAtInitNames.contains(name)) {
 					list.add(dataList.get(i));
-			}else {
-				if (holders.get(i).isChecked())
+				}
+			} else if (holders.get(i).isChecked()) {
 					list.add(dataList.get(i));
 			}
 		}
@@ -146,9 +151,9 @@ public class WordsListCardAdapter extends DecoratedRecyclerViewAdapter<WordsList
 		@Override
 		void scrollUpdate(float distanceToCenter, int position) {
 			mView.setPivotY(mView.getMeasuredHeight() * 0.5f);
-			if(position == POSITION_LEFT){
+			if (position == POSITION_LEFT) {
 				mView.setPivotX(mView.getMeasuredWidth() * distanceToCenter);
-			}else{
+			} else {
 				mView.setPivotX(mView.getMeasuredWidth() * (1 - distanceToCenter));
 			}
 			float minScale = 0.75f, maxScale = 1;
