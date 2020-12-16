@@ -47,7 +47,10 @@ public class GameActivity extends AppCompatActivity {
 	private List<String> mWords;
 	private int mCurrentPlayerIndex = 0;
 	private List<Player> mPlayers = new ArrayList<>();
-	private boolean isRoundFinished = false;
+	// true if round sheet is showed, otherwise ready sheet is showed
+	private boolean isInRound = false;
+	// true if time is up (but round is still going on)
+	private boolean isRoundTimeIsUp = false;
 	private boolean isWordVisible = true;
 
 	private PlayerScoresAdapter mScoresAdapter;
@@ -137,11 +140,6 @@ public class GameActivity extends AppCompatActivity {
 		
 		mEndGameButton.setOnClickListener(v -> showEndGameDialog());
 
-		Toolbar toolbar = findViewById(R.id.app_bar);
-		toolbar.setNavigationOnClickListener(v -> {
-			finish();
-		});
-
 		RecyclerView scoresRecycler = findViewById(R.id.game_scores_recycler);
 		scoresRecycler.setHasFixedSize(true);
 		scoresRecycler.setLayoutManager(new LinearLayoutManager(GameActivity.this, RecyclerView.VERTICAL, false));
@@ -151,6 +149,37 @@ public class GameActivity extends AppCompatActivity {
 		calcWords();
 
 		loadReadyScreen();
+
+		Toolbar toolbar = findViewById(R.id.app_bar);
+		toolbar.setNavigationOnClickListener(v -> {
+			onBackPressed();
+		});
+	}
+
+	/**
+	 * Finishes activity if all data saved (round ended) or asks user for it if not.
+	 */
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+
+		if(isInRound)
+			//check that user understand game will not be saved
+			new AlertDialog.Builder(GameActivity.this, R.style.AlertDialog_Croco)
+					.setTitle("Уверен что хочешь выйти?")
+					.setMessage("Промежуточные результаты не сохранятся.")
+					.setCancelable(true)
+					.setPositiveButton("Остаться", (dialog, which) -> {
+						dialog.dismiss();
+					})
+					.setNegativeButton("Выйти", (dialog, which) -> {
+						finish();
+					})
+					.create()
+					.show();
+		else {
+			finish();
+		}
 	}
 
 	/**
@@ -169,7 +198,7 @@ public class GameActivity extends AppCompatActivity {
 			Player currentPlayer = mPlayers.get(mCurrentPlayerIndex);
 			currentPlayer.addPoints(-mGameConfig.pointFinePerSkip);
 
-			if(isRoundFinished){
+			if(isRoundTimeIsUp){
 				endRound();
 			}else {
 				loadNewWord();
@@ -188,7 +217,7 @@ public class GameActivity extends AppCompatActivity {
 			Player currentPlayer = mPlayers.get(mCurrentPlayerIndex);
 			currentPlayer.addPoints(mGameConfig.pointsPerWord);
 
-			if(isRoundFinished){
+			if(isRoundTimeIsUp){
 				endRound();
 			}else {
 				loadNewWord();
@@ -391,7 +420,7 @@ public class GameActivity extends AppCompatActivity {
 
 		mScoresAdapter.update(pointSortedPlayers);
 
-		// game should be saved every round and on the start (probably rewriten)
+		// game should be saved every round and on the start (probably rewritten)
 		IOHelper.saveGame(mGameConfig, mPlayers, mCurrentPlayerIndex);
 	}
 
@@ -436,7 +465,8 @@ public class GameActivity extends AppCompatActivity {
 		mRoundEndHandler.postDelayed(timerSoundRateAnimator::start, (mGameConfig.roundDuration - TIMER_SOUND_RATE_INCREASING_DURATION) * 1000);
 
 		mRoundEndHandler.postDelayed(this::timeUp, mGameConfig.roundDuration * 1000);
-		isRoundFinished = false;
+		isRoundTimeIsUp = false;
+		isInRound = true;
 		
 		loadNewWord();
 	}
@@ -445,7 +475,7 @@ public class GameActivity extends AppCompatActivity {
 		mSoundPool.stop(mTimerTickStreamId);
 		mRoundEndStreamId = mSoundPool.play(mRoundEndSoundId, curVolume, curVolume, 1, 0, 1);
 
-		isRoundFinished = true;
+		isRoundTimeIsUp = true;
 
 		VibrationHelper.vibrate(VibrationHelper.TYPE_STRONG);
 	}
@@ -465,6 +495,8 @@ public class GameActivity extends AppCompatActivity {
 		}else{
 			mEndGameButton.setVisibility(View.GONE);
 		}
+
+		isInRound = false;
 
 		loadReadyScreen();
 	}
