@@ -24,7 +24,6 @@ import com.hypersphere.croco.R;
 import com.hypersphere.croco.helpers.IOHelper;
 
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent;
-import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEventListener;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +35,7 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 
 	private List<String> mData;
 	private ItemTouchHelper mItemTouchHelper;
-	private PlayerNameHolder holderInEditing;
+	private PlayerNameHolder mHolderInEditing;
 
 	public PlayerNamesAdapter(List<String> data) {
 		mData = data;
@@ -53,10 +52,15 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 
 	@Override
 	public void onBindViewHolder(@NonNull PlayerNameHolder holder, int position) {
-		holder.fill(mData.get(position), position);
+		holder.fill(mData.get(position));
 		//holder.setLast(position == getItemCount() - 1);
 	}
 
+	/**
+	 * Swipes two elements in data array and notifies recycler about it.
+	 * @param first index of element which was swiped
+	 * @param second index of other element which was swiped
+	 */
 	public void swipe(int first, int second){
 		Collections.swap(mData, first, second);
 		notifyItemMoved(first, second);
@@ -67,8 +71,8 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 	}
 
 	public List<String> getPlayerNames(){
-		if(holderInEditing != null)
-			holderInEditing.endEditing();
+		if(mHolderInEditing != null)
+			mHolderInEditing.endEditing();
 
 		return mData;
 	}
@@ -84,8 +88,6 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 		private View mBottomLine;
 		private EditText mNameEdit;
 		private View mBackground;
-
-		private int mPosition;
 
 		public PlayerNameHolder(@NonNull View itemView) {
 			super(itemView);
@@ -113,7 +115,7 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 				InputMethodManager imm = (InputMethodManager) CrocoApplication.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.showSoftInput(mNameEdit, InputMethodManager.SHOW_IMPLICIT);
 
-				holderInEditing = PlayerNameHolder.this;
+				mHolderInEditing = PlayerNameHolder.this;
 			});
 
 			ImageButton randomButton = itemView.findViewById(R.id.player_name_item_random_button);
@@ -136,19 +138,16 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 					endEditing();
 				}
 			});
-			KeyboardVisibilityEvent.setEventListener(getActivity(mNameEdit), new KeyboardVisibilityEventListener() {
-				@Override
-				public void onVisibilityChanged(boolean isOpen) {
-					if(!isOpen){
-						endEditing();
-					}
+			KeyboardVisibilityEvent.setEventListener(getActivity(mNameEdit), isOpen -> {
+				if(!isOpen){
+					endEditing();
 				}
 			});
 		}
 
 		private void endEditing(){
-			if(holderInEditing == PlayerNameHolder.this){
-				holderInEditing = null;
+			if(mHolderInEditing == PlayerNameHolder.this){
+				mHolderInEditing = null;
 			}
 			String newName = String.valueOf(mNameEdit.getText());
 
@@ -195,15 +194,14 @@ public class PlayerNamesAdapter extends RecyclerView.Adapter<PlayerNamesAdapter.
 		}
 		
 		private void update(String newName){
-			mData.set(mPosition, newName);
+			mData.set(getAdapterPosition(), newName);
 			mNameText.setText(newName);
 			mNameEdit.setText(newName);
 		}
 
-		void fill(String name, int position){
+		void fill(String name){
 			mNameText.setText(name);
 			mNameEdit.setText(name);
-			mPosition = position;
 		}
 
 		void setLast(boolean isLast){

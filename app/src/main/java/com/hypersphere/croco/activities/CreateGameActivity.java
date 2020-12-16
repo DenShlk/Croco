@@ -107,7 +107,7 @@ public class CreateGameActivity extends AppCompatActivity {
 
 					intent.putExtra("gameConfig", config);
 					startActivityForResult(intent, CHOOSE_PLAYERS_NAMES_ACTIVITY_REQUEST_CODE);
-				}else{
+				}else {
 					//create game skipping choosing names and finishing this activity just after
 					intent = new Intent(CreateGameActivity.this, GameActivity.class);
 
@@ -115,7 +115,6 @@ public class CreateGameActivity extends AppCompatActivity {
 					startActivity(intent);
 					finish();
 				}
-
 			}
 		});
 
