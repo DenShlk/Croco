@@ -131,8 +131,9 @@ public class CreateGameActivity extends AppCompatActivity {
 	 * and this activity should be finished, otherwise user returned from
 	 * {@link ChoosePlayersNamesActivity} to change some settings (at least we expect so).
 	 * @param requestCode
-	 * @param resultCode
-	 * @param data
+	 * @param resultCode {@code RESULT_OK} if game started and activity should be finished or
+	 *                                    otherwise game not started.
+	 * @param data null
 	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

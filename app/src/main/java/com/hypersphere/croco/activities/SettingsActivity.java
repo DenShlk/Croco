@@ -1,13 +1,12 @@
 package com.hypersphere.croco.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.android.material.button.MaterialButton;
-import com.hypersphere.croco.CrocoApplication;
 import com.hypersphere.croco.R;
 import com.hypersphere.croco.helpers.IOHelper;
 import com.hypersphere.croco.helpers.SettingsHelper;
@@ -40,14 +39,14 @@ public class SettingsActivity extends AppCompatActivity {
 
 		mSoundButton.setOnClickListener(v -> {
 			soundPref=!soundPref;
-			updateButtons();
 			SettingsHelper.setSoundPref(soundPref);
+			updateButtons();
 		});
 		mVibroButton.setOnClickListener(v -> {
 			vibroPref=!vibroPref;
+			SettingsHelper.setVibroPref(vibroPref);
 			if(vibroPref) VibrationHelper.vibrate(VibrationHelper.TYPE_LIGHT);
 			updateButtons();
-			SettingsHelper.setVibroPref(vibroPref);
 		});
 
 		mResetUsedWords.setOnClickListener(v -> {

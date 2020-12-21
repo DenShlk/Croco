@@ -70,7 +70,7 @@ public class GameActivity extends AppCompatActivity {
 
 	private static final int TIMER_SOUND_RATE_INCREASING_DURATION = 10;
 	private static final float TIMER_SOUND_MIN_RATE = 1.0f;
-	private static final float TIMER_SOUND_MAX_RATE = 5.0f;
+	private static final float TIMER_SOUND_MAX_RATE = 2.0f;
 
 	private Handler mRoundEndHandler = new Handler();
 	private SoundPool mSoundPool;
@@ -92,7 +92,7 @@ public class GameActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_game);
 
-		adjustAudio();
+		setUpAudio();
 
 		if(getIntent().hasExtra("continue")){
 			IOHelper.GameData gameData = IOHelper.restoreGame();
@@ -242,7 +242,7 @@ public class GameActivity extends AppCompatActivity {
 	/**
 	 * Sets {@link AudioAttributes} for {@code mSoundPool} and loads sound clips to it.
 	 */
-	private void adjustAudio() {
+	private void setUpAudio() {
 		AudioAttributes attributes = new AudioAttributes.Builder()
 				.setUsage(AudioAttributes.USAGE_GAME)
 				.setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
@@ -439,28 +439,22 @@ public class GameActivity extends AppCompatActivity {
 
 		timerAnimator.setInterpolator(new LinearInterpolator());
 
-		timerAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-			@Override
-			public void onAnimationUpdate(ValueAnimator animation) {
-				float timeLeft = (Float) animation.getAnimatedValue();
-				mTimerBar.setProgress(timeLeft);
-				int fullSecondsLeft = (int) timeLeft;
-				mTimerText.setText(String.valueOf(fullSecondsLeft));
-			}
+		timerAnimator.addUpdateListener(animation -> {
+			float timeLeft = (Float) animation.getAnimatedValue();
+			mTimerBar.setProgress(timeLeft);
+			int fullSecondsLeft = (int) timeLeft;
+			mTimerText.setText(String.valueOf(fullSecondsLeft));
 		});
 		timerAnimator.start();
 
 		timerSoundRateAnimator = ValueAnimator.ofFloat(TIMER_SOUND_MIN_RATE, TIMER_SOUND_MAX_RATE);
 		timerSoundRateAnimator.setInterpolator(new LinearInterpolator());
 		timerSoundRateAnimator.setDuration((long) (TIMER_SOUND_RATE_INCREASING_DURATION * 1000 / animationScale));
-		timerSoundRateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-			@Override
-			public void onAnimationUpdate(ValueAnimator animation) {
-				float rate = (float) animation.getAnimatedValue();
-				mSoundPool.setRate(mTimerTickStreamId, rate);
-				//float volume = (float) (1 + Math.pow(rate - TIMER_SOUND_MIN_RATE, 2));
-				//mSoundPool.setVolume(mTimerTickStreamId, volume, volume);
-			}
+		timerSoundRateAnimator.addUpdateListener(animation -> {
+			float rate = (float) animation.getAnimatedValue();
+			mSoundPool.setRate(mTimerTickStreamId, rate);
+			//float volume = (float) (1 + Math.pow(rate - TIMER_SOUND_MIN_RATE, 2));
+			//mSoundPool.setVolume(mTimerTickStreamId, volume, volume);
 		});
 		mRoundEndHandler.postDelayed(timerSoundRateAnimator::start, (mGameConfig.roundDuration - TIMER_SOUND_RATE_INCREASING_DURATION) * 1000);
 

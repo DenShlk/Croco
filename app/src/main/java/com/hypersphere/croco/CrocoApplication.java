@@ -34,6 +34,7 @@ public class CrocoApplication extends Application {
 		ArrayList<WordsList> lists = new ArrayList<>();
 
 		lists.add(new WordsList(R.raw.basic, R.drawable.basic));
+		lists.add(new WordsList(R.raw.christmas, R.drawable.christmas));
 		lists.add(new WordsList(R.raw.food, R.drawable.food));
 		lists.add(new WordsList(R.raw.animals, R.drawable.animals));
 
