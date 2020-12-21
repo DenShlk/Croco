@@ -47,8 +47,10 @@ public class GameActivity extends AppCompatActivity {
 	private List<String> mWords;
 	private int mCurrentPlayerIndex = 0;
 	private List<Player> mPlayers = new ArrayList<>();
+
 	// true if round sheet is showed, otherwise ready sheet is showed
 	private boolean isInRound = false;
+
 	// true if time is up (but round is still going on)
 	private boolean isRoundTimeIsUp = false;
 	private boolean isWordVisible = true;
@@ -161,8 +163,6 @@ public class GameActivity extends AppCompatActivity {
 	 */
 	@Override
 	public void onBackPressed() {
-		super.onBackPressed();
-
 		if(isInRound)
 			//check that user understand game will not be saved
 			new AlertDialog.Builder(GameActivity.this, R.style.AlertDialog_Croco)
